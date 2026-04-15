@@ -216,13 +216,9 @@ Database
 
 ---
 
-# Kết luận
+## migration
+flask db init
 
-Structure này đảm bảo:
-
-- Clean Architecture
-- CQRS rõ ràng nhưng không rối
-- Phù hợp Python (không quá nhiều layer)
-
-Đây là kiến trúc production-ready cho hệ thống MediGo.
-
+-- đẻ update db bằng migration
+flask db migrate -m "init db" || flask --app manage.py db migrate -m "init db"
+flask --app manage.py db upgrade
