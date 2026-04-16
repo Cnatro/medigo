@@ -1,9 +1,11 @@
+import uuid
+
 from app.infrastructure.db import db
 
 class TimeSlotModel(db.Model):
     __tablename__ = "time_slots"
 
-    id = db.Column(db.String, primary_key=True)
+    id = db.Column(db.String, primary_key=True,default=lambda: str(uuid.uuid4()))
     doctor_id = db.Column(db.String, db.ForeignKey("doctors.id"))
     schedule_id = db.Column(db.String, db.ForeignKey("doctor_schedules.id"))
     date = db.Column(db.Date)

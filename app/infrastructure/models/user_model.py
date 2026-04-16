@@ -1,4 +1,6 @@
 import uuid
+from datetime import datetime
+
 from app.infrastructure.db import db
 
 
@@ -11,8 +13,8 @@ class UserModel(db.Model):
     phone = db.Column(db.String)
     password = db.Column(db.String)
     role = db.Column(db.String)
-    created_at = db.Column(db.DateTime)
-    updated_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     doctor = db.relationship("DoctorModel", back_populates="user", uselist=False)
     patient = db.relationship("PatientModel", back_populates="user", uselist=False)
