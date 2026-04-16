@@ -2,8 +2,8 @@ from app.core.entities.base_entity import BaseEntity
 
 
 class User(BaseEntity):
-    def __init__(self, id, full_name, email, phone, password, role,
-                 created_at=None, updated_at=None):
+    def __init__(self, id, full_name, email, password, role,
+                 created_at=None, updated_at=None, phone= None):
         super().__init__(id)
         self.full_name = full_name
         self.email = email

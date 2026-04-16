@@ -1,9 +1,11 @@
+import uuid
+
 from app.infrastructure.db import db
 
 class DoctorScheduleModel(db.Model):
     __tablename__ = "doctor_schedules"
 
-    id = db.Column(db.String, primary_key=True)
+    id = db.Column(db.String, primary_key=True, default=lambda: str(uuid.uuid4()))
     doctor_id = db.Column(db.String, db.ForeignKey("doctors.id"))
     day_of_week = db.Column(db.Integer)
     start_time = db.Column(db.Time)

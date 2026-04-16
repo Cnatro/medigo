@@ -11,24 +11,13 @@ medigo/
 │   ├── api/
 │   │   └── app.py
 │   │
+│   ├── config.py
+│   ├── dependencies.py
+│   │
 │   ├── core/
 │   │   ├── entities/
-│   │   │   ├── user.py
-│   │   │   ├── doctor.py
-│   │   │   ├── booking.py
-│   │   │   └── schedule.py
-│   │   │
-│   │   ├── services/              #  business logic (CQRS gộp nhẹ)
-│   │   │   ├── user_service.py
-│   │   │   ├── doctor_service.py
-│   │   │   ├── booking_service.py
-│   │   │   └── schedule_service.py
-│   │   │
 │   │   ├── repositories/
-│   │   │   ├── user_repository.py
-│   │   │   ├── doctor_repository.py
-│   │   │   ├── booking_repository.py
-│   │   │   └── schedule_repository.py
+│   │   ├── services/
 │   │
 │   ├── infrastructure/
 │   │   ├── db.py
@@ -37,10 +26,19 @@ medigo/
 │   │
 │   ├── interfaces/
 │   │   ├── controllers/
+│   │   ├── mappers/
 │   │   ├── routes/
-│   │
-│   ├── dependencies.py
-│   └── config.py
+│   │   └── shared/
+│   │       └── utils/
+│   │         
+│
+├── manage.py
+├── run.py
+├── requirements.txt
+│
+├── migrations/
+│  
+└── tests/
 ```
 
 ---
@@ -216,9 +214,27 @@ Database
 
 ---
 
-## migration
-flask db init
+# Migration (database)
 
--- đẻ update db bằng migration
-flask db migrate -m "init db" || flask --app manage.py db migrate -m "init db"
+Khởi tạo migration:
+```
+flask db init
+```
+
+Tạo migration mới (sau khi thay đổi models):
+```
+flask db migrate -m "message"
+```
+hoặc (nếu dùng manage.py):
+```
+flask --app manage.py db migrate -m "message"
+```
+
+Nâng cấp database:
+```
+flask db upgrade
+```
+hoặc:
+```
 flask --app manage.py db upgrade
+```
