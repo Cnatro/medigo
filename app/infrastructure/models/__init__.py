@@ -11,3 +11,5 @@ from .review_model import *
 from .symptom_model import *
 from .symptom_specialty_model import *
 from .chat_model import *
+from .order_model import *
+from .payment_transaction_model import *
