@@ -27,3 +27,12 @@ class UserRepositoryImpl(UserRepository):
         db.session.refresh(model)
 
         return UserMapper.model_to_entity(model)
+
+    @override
+    def find_by_id(self, id):
+        model = UserModel.query.filter_by(id=id).first()
+
+        if not model:
+            return None
+
+        return UserMapper.model_to_entity(model)

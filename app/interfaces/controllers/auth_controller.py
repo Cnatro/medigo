@@ -35,20 +35,15 @@ class AuthController:
             "email": result.email,
             "full_name": result.full_name,
             "phone": result.phone,
-            "role" : result.role
+            "role": result.role
         })
-
 
     def login(self):
         data = request.json
 
-        user, code = self.user_query_service.get_by_email(data["email"])
+        data, code = self.user_query_service.login(email=data["email"], password=data["password"])
 
-        if not user:
+        if not data:
             return ApiResponse.error(code), 401
 
-        token = create_access_token(identity=user.id)
-
-        return ApiResponse.success(MessageCode.SUCCESS, {
-            "accessToken": token
-        })
+        return ApiResponse.success(code, data=data)
