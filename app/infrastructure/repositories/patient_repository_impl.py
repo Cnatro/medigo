@@ -3,6 +3,7 @@ from typing_extensions import override
 from app.core.entities.patient import Patient
 from app.core.repositories.patient_repository import PatientRepository
 from app.infrastructure.db import db
+from app.infrastructure.models import PatientModel
 from app.interfaces.mappers.patient_mapper import PatientMapper
 
 
@@ -15,5 +16,14 @@ class PatientRepositoryImpl(PatientRepository):
         db.session.add(model)
         db.session.commit()
         db.session.refresh(model)
+
+        return PatientMapper.model_to_entity(model)
+
+    @override
+    def find_by_user_id(self, user_id):
+        model = PatientModel.query.filter_by(user_id=user_id).first()
+
+        if not model:
+            return None
 
         return PatientMapper.model_to_entity(model)

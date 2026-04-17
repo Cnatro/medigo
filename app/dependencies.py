@@ -1,3 +1,4 @@
+from app.core.services.handle_role.query_registry import ROLE_QUERY_HANDLERS
 from app.core.services.handle_role.registry import ROLE_HANDLES
 from app.core.services.user_command_service import UserCommandService
 from app.core.services.user_query_service import UserQueryService
@@ -8,18 +9,28 @@ from app.shared.utils.role import Role
 
 import app.core.services.handle_role
 
+
 def get_user_repo():
     return UserRepositoryImpl()
 
-def get_role_handlers():
+
+def get_role_command_handlers():
     return {
         Role.DOCTOR.name: ROLE_HANDLES[Role.DOCTOR.name](DoctorRepositoryImpl()),
         Role.PATIENT.name: ROLE_HANDLES[Role.PATIENT.name](PatientRepositoryImpl()),
     }
 
+
+def get_role_query_handlers():
+    return {
+        Role.DOCTOR.name: ROLE_QUERY_HANDLERS[Role.DOCTOR.name](DoctorRepositoryImpl()),
+        Role.PATIENT.name: ROLE_QUERY_HANDLERS[Role.PATIENT.name](PatientRepositoryImpl())
+    }
+
+
 def get_user_command_service():
     repo = get_user_repo()
-    role_handlers = get_role_handlers()
+    role_handlers = get_role_command_handlers()
 
     return UserCommandService(
         repo=repo,
@@ -29,4 +40,8 @@ def get_user_command_service():
 
 def get_user_query_service():
     repo = get_user_repo()
-    return UserQueryService(repo=repo)
+    role_query_handlers = get_role_query_handlers()
+    return UserQueryService(
+        repo=repo,
+        role_query_handlers=role_query_handlers
+    )

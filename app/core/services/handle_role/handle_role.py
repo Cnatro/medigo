@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import override
 
 from app.core.entities.doctor import Doctor
 from app.core.entities.patient import Patient
@@ -19,6 +20,7 @@ class DoctorRoleHandler(BaseHandle):
     def __init__(self, doctor_repo):
         self.doctor_repo = doctor_repo
 
+    @override
     def handle(self, user, profile):
         doctor = Doctor(
             id=None,
@@ -39,6 +41,7 @@ class PatientRoleHandler(BaseHandle):
     def __init__(self, patient_repo):
         self.patient_repo = patient_repo
 
+    @override
     def handle(self, user, profile):
         patient = Patient(
             id=None,

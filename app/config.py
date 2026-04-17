@@ -8,6 +8,9 @@ class Config:
     DB_PASSWORD = os.getenv("DB_PASSWORD")
     DB_SSLMODE = os.getenv("DB_SSLMODE", "require")
 
+    SECRET_KEY = os.getenv("SECRET_KEY")
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+
     SQLALCHEMY_DATABASE_URI = (
         f"postgresql://{DB_USER}:{DB_PASSWORD}"
         f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"

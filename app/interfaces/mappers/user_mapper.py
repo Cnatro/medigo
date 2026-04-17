@@ -11,7 +11,7 @@ class UserMapper:
             full_name=model.full_name,
             email=model.email,
             phone=model.phone,
-            password=None,
+            password=model.password,
             role=model.role,
             created_at=model.created_at,
             updated_at=model.updated_at
