@@ -11,24 +11,13 @@ medigo/
 │   ├── api/
 │   │   └── app.py
 │   │
+│   ├── config.py
+│   ├── dependencies.py
+│   │
 │   ├── core/
 │   │   ├── entities/
-│   │   │   ├── user.py
-│   │   │   ├── doctor.py
-│   │   │   ├── booking.py
-│   │   │   └── schedule.py
-│   │   │
-│   │   ├── services/              #  business logic (CQRS gộp nhẹ)
-│   │   │   ├── user_service.py
-│   │   │   ├── doctor_service.py
-│   │   │   ├── booking_service.py
-│   │   │   └── schedule_service.py
-│   │   │
 │   │   ├── repositories/
-│   │   │   ├── user_repository.py
-│   │   │   ├── doctor_repository.py
-│   │   │   ├── booking_repository.py
-│   │   │   └── schedule_repository.py
+│   │   ├── services/
 │   │
 │   ├── infrastructure/
 │   │   ├── db.py
@@ -37,10 +26,19 @@ medigo/
 │   │
 │   ├── interfaces/
 │   │   ├── controllers/
+│   │   ├── mappers/
 │   │   ├── routes/
-│   │
-│   ├── dependencies.py
-│   └── config.py
+│   │   └── shared/
+│   │       └── utils/
+│   │         
+│
+├── manage.py
+├── run.py
+├── requirements.txt
+│
+├── migrations/
+│  
+└── tests/
 ```
 
 ---
@@ -216,13 +214,27 @@ Database
 
 ---
 
-# Kết luận
+# Migration (database)
 
-Structure này đảm bảo:
+Khởi tạo migration:
+```
+flask db init
+```
 
-- Clean Architecture
-- CQRS rõ ràng nhưng không rối
-- Phù hợp Python (không quá nhiều layer)
+Tạo migration mới (sau khi thay đổi models):
+```
+flask db migrate -m "message"
+```
+hoặc (nếu dùng manage.py):
+```
+flask --app manage.py db migrate -m "message"
+```
 
-Đây là kiến trúc production-ready cho hệ thống MediGo.
-
+Nâng cấp database:
+```
+flask db upgrade
+```
+hoặc:
+```
+flask --app manage.py db upgrade
+```
