@@ -1,5 +1,3 @@
-import uuid
-
 from app.core.entities.order import Order
 from app.core.services.payment.momo_service import MomoService
 from app.infrastructure.repositories.order_repository_impl import OrderRepositoryImpl

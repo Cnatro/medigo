@@ -1,5 +1,3 @@
-from cgitb import handler
-
 from flask_jwt_extended import create_access_token, get_jwt_identity
 from passlib.handlers.argon2 import argon2
 

@@ -1,7 +1,6 @@
 from passlib.hash import argon2
 
 from app.core.entities.user import User
-from app.core.services.handle_role.registry import ROLE_HANDLES
 from app.shared.utils.message_code import MessageCode
 
 
