@@ -1,9 +1,7 @@
 from flask import request
-from flask_jwt_extended import create_access_token
 
 from app.core.entities.user import User
 from app.shared.utils.api_response import ApiResponse
-from app.shared.utils.message_code import MessageCode
 from app.shared.utils.role import Role
 
 

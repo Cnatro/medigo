@@ -1,8 +1,12 @@
 from app.core.services.handle_role.query_registry import ROLE_QUERY_HANDLERS
 from app.core.services.handle_role.registry import ROLE_HANDLES
+from app.core.services.order_command_service import OrderCommandService
+from app.core.services.order_query_service import OrderQueryService
+from app.core.services.payment.momo_service import MomoService
 from app.core.services.user_command_service import UserCommandService
 from app.core.services.user_query_service import UserQueryService
 from app.infrastructure.repositories.doctor_repository_impl import DoctorRepositoryImpl
+from app.infrastructure.repositories.order_repository_impl import OrderRepositoryImpl
 from app.infrastructure.repositories.patient_repository_impl import PatientRepositoryImpl
 from app.infrastructure.repositories.user_repository_impl import UserRepositoryImpl
 from app.shared.utils.role import Role
@@ -44,4 +48,22 @@ def get_user_query_service():
     return UserQueryService(
         repo=repo,
         role_query_handlers=role_query_handlers
+    )
+
+
+def get_order_repo():
+    return OrderRepositoryImpl()
+
+
+def get_order_command_service():
+    momo_service = MomoService()
+    return OrderCommandService(
+        order_repo=get_order_repo(),
+        momo_service=momo_service
+    )
+
+def get_order_query_service():
+
+    return OrderQueryService(
+        order_repo=get_order_repo()
     )
