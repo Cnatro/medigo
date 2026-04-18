@@ -11,6 +11,17 @@ class Config:
     SECRET_KEY = os.getenv("SECRET_KEY")
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 
+    MOMO_PARTNER_CODE = os.getenv("MOMO_PARTNER_CODE")
+    MOMO_ACCESS_KEY = os.getenv("MOMO_ACCESS_KEY")
+    MOMO_SECRET_KEY = os.getenv("MOMO_SECRET_KEY")
+
+    MOMO_ENDPOINT = os.getenv("MOMO_ENDPOINT")
+    MOMO_REFUND_ENDPOINT = os.getenv("MOMO_REFUND_ENDPOINT")
+    MOMO_QUERY_ENDPOINT=os.getenv("MOMO_QUERY_ENDPOINT")
+
+    MOMO_RETURN_URL = os.getenv("MOMO_RETURN_URL")
+    MOMO_NOTIFY_URL = os.getenv("MOMO_NOTIFY_URL")
+
     SQLALCHEMY_DATABASE_URI = (
         f"postgresql://{DB_USER}:{DB_PASSWORD}"
         f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
