@@ -19,3 +19,4 @@ controller = OrderController(
 
 order_bp.route("",methods=["POST"])(controller.created_order)
 order_bp.route("/momo/callback",methods=["POST"])(controller.momo_call_back)
+order_bp.route("/cancel-order",methods=["POST"])(controller.cancel_order)

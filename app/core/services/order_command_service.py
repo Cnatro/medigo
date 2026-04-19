@@ -34,3 +34,9 @@ class OrderCommandService:
     def momo_call_back(self, data):
         order, message = self.momo_service.handle_momo_callback(self.order_repo, data)
         return order, message
+
+    def refund_money_order(self):
+        #mock data
+        result, code = self.momo_service.refund_money(self.order_repo)
+
+        return result,code

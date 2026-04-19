@@ -7,7 +7,7 @@ from app.core.repositories.payment_history_repository import PaymentHistoryRepos
 from app.infrastructure.db import db
 from app.infrastructure.models import PaymentTransactionModel
 from app.interfaces.mappers.payment_transaction_mapper import PaymentTransactionMapper
-from app.shared.utils.payment_enum import PaymentStatus
+from app.shared.utils.payment_enum import PaymentStatus, PaymentType
 
 
 class PaymentHistoryRepositoryImpl(PaymentHistoryRepository):
@@ -79,3 +79,20 @@ class PaymentHistoryRepositoryImpl(PaymentHistoryRepository):
         except SQLAlchemyError:
             db.session.rollback()
             raise
+
+    @override
+    def find_refund_by_parent(self, parent_transaction_id):
+        model = (
+            PaymentTransactionModel.query
+            .filter(
+                PaymentTransactionModel.parent_transaction_id == parent_transaction_id,
+                PaymentTransactionModel.type == PaymentType.REFUND.name
+            )
+            .order_by(PaymentTransactionModel.created_at.desc())
+            .first()
+        )
+
+        if not model:
+            return None
+
+        return PaymentTransactionMapper.model_to_entity(model)

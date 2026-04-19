@@ -99,11 +99,9 @@ class MomoService:
 
         res = requests.post(Config.MOMO_ENDPOINT, json=payload)
 
-        log.info("[MOMO CREATE] orderId=%s and transaction_cde = %s", order.id , transaction_code)
+        log.info("[MOMO CREATE] orderId=%s and transaction_cde = %s", order.id, transaction_code)
 
         return res.json()
-
-
 
     def handle_momo_callback(self, order_repo: OrderRepositoryImpl, data):
 
@@ -139,11 +137,9 @@ class MomoService:
             log.error("[MOMO] Transaction not found: %s", data["orderId"])
             return None, MessageCode.TRANSACTION_NOT_FOUND
 
-
         if transaction.status == PaymentStatus.SUCCESS.name:
             log.info("[MOMO] Already processed")
             return None, MessageCode.ALREADY_PAID
-
 
         try:
             extra_data = json.loads(base64.b64decode(data["extraData"]))
@@ -163,7 +159,6 @@ class MomoService:
         transaction.provider_transaction_id = str(data["transId"])
         transaction.request_id = str(data["requestId"])
         transaction.raw_response = data
-
 
         self.append_log(
             transaction,
@@ -197,3 +192,94 @@ class MomoService:
 
             self.payment_repo.update(transaction)
             return None, MessageCode.PAYMENT_FAILED
+
+    def refund_money(self, order_repo, payment_history: PaymentTransaction = None):
+        payment_history = self.payment_repo.find_by_transaction_code("PAY_1776582587_852522e6-b603-46dd-bc83-30ebfeb7ba85")
+        if not payment_history.provider_transaction_id:
+            return None, MessageCode.INVALID_DATA
+
+        # idempotent
+        existing = self.payment_repo.find_refund_by_parent(payment_history.id)
+        if existing and existing.status == PaymentStatus.REFUND_SUCCESS.name:
+            return None, MessageCode.ALREADY_REFUNDED
+
+        request_id = str(uuid.uuid4())
+        refund_code = f"REFUND_{int(time.time())}_{uuid.uuid4().hex[:6]}"
+
+        raw_data = (
+            f"accessKey={Config.MOMO_ACCESS_KEY}"
+            f"&amount={int(payment_history.amount)}"
+            f"&description="
+            f"&orderId={refund_code}"
+            f"&partnerCode={Config.MOMO_PARTNER_CODE}"
+            f"&requestId={request_id}"
+            f"&transId={int(payment_history.provider_transaction_id)}"
+        )
+
+        signature = sign_momo(raw_data, Config.MOMO_SECRET_KEY)
+
+        payload = {
+            "partnerCode": Config.MOMO_PARTNER_CODE,
+            "orderId": refund_code,
+            "requestId": request_id,
+            "amount": int(payment_history.amount),
+            "transId": int(payment_history.provider_transaction_id),
+            "lang": "vi",
+            "description": "",
+            "signature": signature
+        }
+
+        transaction = PaymentTransaction(
+            id=None,
+            order_id=payment_history.order_id,
+            type=PaymentType.REFUND.name,
+            provider=PaymentProvider.MOMO.name,
+            transaction_code=refund_code,
+            provider_transaction_id=None,
+            request_id=request_id,
+            amount=payment_history.amount,
+            status=PaymentStatus.PENDING.name,
+            parent_transaction_id=payment_history.id,
+            raw_response=payload,
+            paid_at=None,
+            logs=[]
+        )
+
+        self.append_log(transaction, "PENDING", "Init refund", payload)
+        transaction_saved = self.payment_repo.save(transaction)
+
+        res = requests.post(Config.MOMO_REFUND_ENDPOINT, json=payload)
+
+        if res.status_code != 200:
+            transaction_saved.status = PaymentStatus.REFUND_FAILED.name
+            self.payment_repo.update(transaction_saved)
+            return None, MessageCode.REFUND_FAILED
+
+        data = res.json()
+        meta = get_result_meta(data["resultCode"])
+
+        transaction_saved.provider_transaction_id = str(data.get("transId"))
+        transaction_saved.raw_response = data
+
+        self.append_log(transaction_saved, meta["type"], meta["message"], data)
+
+        if meta["type"] == "SUCCESS":
+            transaction_saved.status = PaymentStatus.REFUND_SUCCESS.name
+            transaction_saved.paid_at = datetime.fromtimestamp(data["responseTime"] / 1000)
+
+            order = order_repo.update_order_status(
+                order_id=payment_history.order_id,
+                status=OrderStatus.REFUND_SUCCESS
+            )
+
+            self.payment_repo.update(transaction_saved)
+            return order, MessageCode.PAYMENT_SUCCESS
+
+        elif meta["type"] == "PENDING":
+            self.payment_repo.update(transaction_saved)
+            return None, MessageCode.REFUND_PENDING
+
+        else:
+            transaction_saved.status = PaymentStatus.REFUND_FAILED.name
+            self.payment_repo.update(transaction_saved)
+            return None, MessageCode.REFUND_FAILED
