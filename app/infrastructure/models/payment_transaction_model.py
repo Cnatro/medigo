@@ -27,6 +27,7 @@ class PaymentTransactionModel(db.Model):
     )
 
     raw_response = db.Column(db.JSON)
+    logs = db.Column(db.JSON, default=list) #fix tạm thêm logs -> thực tế nên tạo ra 1 bảng ghi log
 
     paid_at = db.Column(db.DateTime)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

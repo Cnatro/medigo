@@ -8,6 +8,7 @@ from app.core.services.user_query_service import UserQueryService
 from app.infrastructure.repositories.doctor_repository_impl import DoctorRepositoryImpl
 from app.infrastructure.repositories.order_repository_impl import OrderRepositoryImpl
 from app.infrastructure.repositories.patient_repository_impl import PatientRepositoryImpl
+from app.infrastructure.repositories.payment_history_repository_impl import PaymentHistoryRepositoryImpl
 from app.infrastructure.repositories.user_repository_impl import UserRepositoryImpl
 from app.shared.utils.role import Role
 
@@ -56,7 +57,8 @@ def get_order_repo():
 
 
 def get_order_command_service():
-    momo_service = MomoService()
+    payment_history_repo = PaymentHistoryRepositoryImpl()
+    momo_service = MomoService(payment_repo=payment_history_repo)
     return OrderCommandService(
         order_repo=get_order_repo(),
         momo_service=momo_service

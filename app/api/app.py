@@ -1,8 +1,8 @@
 import logging
-
 from dotenv import load_dotenv
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
+
 
 from app.interfaces.routes.auth_routes import auth_bp
 from app.interfaces.routes.order_routes import order_bp
@@ -15,6 +15,13 @@ from app.config import Config
 from app.infrastructure.db import db
 
 migrate = Migrate()
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+)
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
