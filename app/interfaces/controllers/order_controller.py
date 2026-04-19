@@ -39,3 +39,8 @@ class OrderController:
         log.info("MOMO call back result: %s", result)
         return ApiResponse.success(code, result)
 
+
+    def cancel_order(self):
+        result , code = self.order_command_service.refund_money_order()
+
+        return ApiResponse.success(code, result)
