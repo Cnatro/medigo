@@ -1,4 +1,6 @@
 import os
+from datetime import timedelta
+
 
 class Config:
     DB_HOST = os.getenv("DB_HOST")
@@ -10,6 +12,7 @@ class Config:
 
     SECRET_KEY = os.getenv("SECRET_KEY")
     JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=1)
 
     MOMO_PARTNER_CODE = os.getenv("MOMO_PARTNER_CODE")
     MOMO_ACCESS_KEY = os.getenv("MOMO_ACCESS_KEY")

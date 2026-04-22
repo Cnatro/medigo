@@ -8,6 +8,7 @@ class PaymentTransaction(BaseEntity):
                  request_id, amount, status,
                  parent_transaction_id=None,
                  raw_response=None,
+                 logs=None,
                  paid_at=None,
                  created_at=None):
         super().__init__(id)
@@ -21,5 +22,6 @@ class PaymentTransaction(BaseEntity):
         self.status = status
         self.parent_transaction_id = parent_transaction_id
         self.raw_response = raw_response
+        self.logs = logs
         self.paid_at = paid_at
         self.created_at = created_at
