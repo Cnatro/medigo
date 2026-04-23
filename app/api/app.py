@@ -37,7 +37,7 @@ def create_app():
             "https://medigo-ui.onrender.com"
         ]}},
         supports_credentials=True,
-        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
         allow_headers=["Content-Type", "Authorization"]
     )
     app.config.from_object(Config)

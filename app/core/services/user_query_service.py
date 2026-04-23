@@ -52,5 +52,7 @@ class UserQueryService:
             "email": user.email,
             "full_name": user.full_name,
             "role": user.role,
+            "avatar_url":user.avatar_url ,
+            "phone":user.phone,
             "profile": profile.__dict__ if profile else None
         }, MessageCode.SUCCESS
