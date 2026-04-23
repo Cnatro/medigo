@@ -2,7 +2,10 @@ from enum import Enum
 
 
 class MessageCode(Enum):
-    USER_EXITS = "USER_EXITS"
+    FORBIDDEN = "FORBIDDEN"
+    UNAUTHORIZED = "UNAUTHORIZED"
+    INVALID_CREDENTIALS = "INVALID_CREDENTIALS"
+    USER_EXISTS = "USER_EXITS"
     REGISTER_USER_SUCCESS = "REGISTER_USER_SUCCESS"
     USER_NOT_FOUND = "USER_NOT_FOUND"
     SUCCESS = "SUCCESS"
@@ -25,3 +28,33 @@ class MessageCode(Enum):
     INVALID_DATA = "INVALID_DATA"
     ALREADY_REFUNDED = "ALREADY_REFUNDED"
 
+STATUS_MAP = {
+    MessageCode.SUCCESS: 200,
+    MessageCode.FAIL: 400,
+    MessageCode.INVALID_DATA: 400,
+
+    MessageCode.USER_EXISTS: 409,
+    MessageCode.USER_NOT_FOUND: 404,
+
+    MessageCode.INVALID_CREDENTIALS: 401,
+
+    MessageCode.UNAUTHORIZED: 401,
+    MessageCode.FORBIDDEN: 403,
+
+    MessageCode.ROLE_NOT_SUPPORTED: 400,
+
+    # PAYMENT
+    MessageCode.PAYMENT_SUCCESS: 200,
+    MessageCode.PAYMENT_PENDING: 202,
+    MessageCode.PAYMENT_FAILED: 400,
+
+    MessageCode.REFUND_SUCCESS: 200,
+    MessageCode.REFUND_PENDING: 202,
+    MessageCode.REFUND_FAILED: 400,
+
+    MessageCode.TRANSACTION_NOT_FOUND: 404,
+    MessageCode.ALREADY_PAID: 409,
+    MessageCode.ALREADY_REFUNDED: 409,
+
+    MessageCode.INVALID_SIGNATURE: 400,
+}

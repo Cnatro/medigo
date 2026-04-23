@@ -22,8 +22,8 @@ class OrderController:
         order = Order(
             id=str(uuid.uuid4()),
             patient_id="d1b82e2d-35e0-4434-a258-935e5724ad0c",
-            appointment_id="3a155fec-1807-4a20-a678-9b9cd1998da4",
-            total_amount=10000,  # tiền test
+            appointment_id="c43308d2-77ce-4cd2-a746-65c456999533",
+            total_amount=20000,  # tiền test
             status="PENDING"
         )
 

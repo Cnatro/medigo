@@ -5,3 +5,4 @@ class DoctorSpecialtyModel(db.Model):
 
     doctor_id = db.Column(db.String, db.ForeignKey("doctors.id"), primary_key=True)
     specialty_id = db.Column(db.String, db.ForeignKey("specialties.id"), primary_key=True)
+    consultation_fee = db.Column(db.Numeric(precision=12, scale=2), default=0)

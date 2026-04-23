@@ -21,11 +21,8 @@ class UserQueryService:
     def login(self, email, password):
         user = self.repo.find_by_email(email=email)
 
-        if user is None:
-            return None, MessageCode.USER_NOT_FOUND
-
-        if not argon2.verify(password, user.password):
-            return None, MessageCode.INVALID_PASSWORD
+        if user is None or not argon2.verify(password, user.password):
+            return None, MessageCode.INVALID_CREDENTIALS
 
         access_token = create_access_token(identity=user.id)
 

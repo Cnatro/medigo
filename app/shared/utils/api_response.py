@@ -1,5 +1,7 @@
 from flask import jsonify
 
+from app.shared.utils.message_code import MessageCode, STATUS_MAP
+
 
 class ApiResponse:
 
@@ -9,7 +11,7 @@ class ApiResponse:
             "status": "success",
             "messageCode": str(messageCode.name),
             "data": _safe_json(data)
-        }), 200
+        }), STATUS_MAP.get(messageCode, 200)
 
     @staticmethod
     def created(messageCode, data=None):
@@ -17,15 +19,16 @@ class ApiResponse:
             "status": "success",
             "messageCode": str(messageCode.name),
             "data": _safe_json(data)
-        }), 201
+        }), STATUS_MAP.get(messageCode, 201)
 
     @staticmethod
     def error(messageCode, data=None):
+
         return jsonify({
             "status": "error",
             "messageCode": str(messageCode.name),
             "data": _safe_json(data)
-        }), 400
+        }), STATUS_MAP.get(messageCode, 400)
 
     @staticmethod
     def not_found(messageCode, data=None):
@@ -33,7 +36,7 @@ class ApiResponse:
             "status": "error",
             "messageCode": str(messageCode.name),
             "data": _safe_json(data)
-        }), 404
+        }), STATUS_MAP.get(messageCode, 404)
 
 
 def _safe_json(obj):
