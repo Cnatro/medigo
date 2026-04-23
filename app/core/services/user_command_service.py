@@ -13,7 +13,7 @@ class UserCommandService:
     def register(self,user: User,profile_data):
 
         if self.repo.find_by_email(user.email):
-            return None, MessageCode.USER_EXITS
+            return None, MessageCode.USER_EXISTS
 
         user.password = argon2.hash(user.password)
         saved_user = self.repo.save(user=user)

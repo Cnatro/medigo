@@ -14,4 +14,4 @@ controller = UserController(
     user_query_service= get_user_query_service()
 )
 
-user_bp.route("",methods=["GET"]) (controller.get_current_user)
+user_bp.route("/me",methods=["GET"]) (controller.get_current_user)

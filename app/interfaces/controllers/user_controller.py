@@ -10,6 +10,6 @@ class UserController:
         data, code = self.user_query_service.get_current_user()
 
         if not data:
-            return ApiResponse.error(code), 401
+            return ApiResponse.error(code)
 
         return ApiResponse.success(messageCode=code, data=data)

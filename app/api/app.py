@@ -1,5 +1,6 @@
 import logging
 from dotenv import load_dotenv
+from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 
@@ -24,6 +25,18 @@ logging.basicConfig(
 
 def create_app():
     app = Flask(__name__)
+
+    CORS(
+        app,
+        resources={r"/api/*": {"origins": [
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "https://your-frontend-domain.com"
+        ]}},
+        supports_credentials=True,
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization"]
+    )
     app.config.from_object(Config)
 
     app.logger.setLevel(logging.INFO)

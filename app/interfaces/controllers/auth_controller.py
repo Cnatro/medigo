@@ -26,7 +26,7 @@ class AuthController:
         result, code = self.user_command_service.register(user, profile_data)
 
         if not result:
-            return ApiResponse.error(code), 400
+            return ApiResponse.error(code)
 
         return ApiResponse.created(code, {
             "id": result.id,
@@ -42,6 +42,6 @@ class AuthController:
         data, code = self.user_query_service.login(email=data["email"], password=data["password"])
 
         if not data:
-            return ApiResponse.error(code), 401
+            return ApiResponse.error(code)
 
         return ApiResponse.success(code, data=data)
