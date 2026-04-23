@@ -14,7 +14,8 @@ class UserMapper:
             password=model.password,
             role=model.role,
             created_at=model.created_at,
-            updated_at=model.updated_at
+            updated_at=model.updated_at,
+            avatar_url=model.avatar_url
         )
 
     @staticmethod
@@ -28,5 +29,6 @@ class UserMapper:
             email=entity.email,
             phone=entity.phone,
             password=entity.password,
-            role=entity.role
+            role=entity.role,
+            avatar_url=entity.avatar_url
         )

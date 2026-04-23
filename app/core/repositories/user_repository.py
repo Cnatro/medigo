@@ -12,3 +12,6 @@ class UserRepository(ABC):
 
     @abstractmethod
     def find_by_id(self, id): pass
+
+    @abstractmethod
+    def update_current_user(self,  user_id, data): pass

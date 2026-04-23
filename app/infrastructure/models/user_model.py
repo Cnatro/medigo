@@ -15,6 +15,7 @@ class UserModel(db.Model):
     role = db.Column(db.String)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    avatar_url = db.Column(db.String)
 
     doctor = db.relationship("DoctorModel", back_populates="user", uselist=False)
     patient = db.relationship("PatientModel", back_populates="user", uselist=False)

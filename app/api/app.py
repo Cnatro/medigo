@@ -34,10 +34,10 @@ def create_app():
         resources={r"/api/*": {"origins": [
             "http://localhost:5173",
             "http://127.0.0.1:5173",
-            "https://your-frontend-domain.com"
+            "https://medigo-ui.onrender.com"
         ]}},
         supports_credentials=True,
-        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
         allow_headers=["Content-Type", "Authorization"]
     )
     app.config.from_object(Config)

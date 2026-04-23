@@ -36,3 +36,19 @@ class UserRepositoryImpl(UserRepository):
             return None
 
         return UserMapper.model_to_entity(model)
+
+
+    @override
+    def update_current_user(self, user_id, data):
+        model = UserModel.query.filter_by(id=user_id).first()
+
+        if not model:
+            return None
+
+        for key, value in data.items():
+            setattr(model, key, value)
+
+        db.session.commit()
+        db.session.refresh(model)
+
+        return UserMapper.model_to_entity(model)
