@@ -6,7 +6,10 @@ from flask_migrate import Migrate
 
 
 from app.interfaces.routes.auth_routes import auth_bp
+from app.interfaces.routes.clinic_routes import clinic_bp
+from app.interfaces.routes.doctor_routes import doctor_bp
 from app.interfaces.routes.order_routes import order_bp
+from app.interfaces.routes.specialty_routes import specialty_bp
 from app.interfaces.routes.user_routes import user_bp
 
 load_dotenv()
@@ -49,6 +52,9 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(user_bp, url_prefix="/api/users")
     app.register_blueprint(order_bp, url_prefix="/api/orders")
+    app.register_blueprint(doctor_bp, url_prefix="/api/doctors")
+    app.register_blueprint(clinic_bp, url_prefix="/api/clinics")
+    app.register_blueprint(specialty_bp, url_prefix="/api/specialties")
 
     app.logger.info("App initialized")
 

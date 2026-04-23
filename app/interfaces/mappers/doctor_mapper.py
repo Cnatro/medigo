@@ -72,29 +72,29 @@ class DoctorMapper:
 
     @staticmethod
     def model_to_full_info_dict(doctor_m, user_m, clinic_m, spec_m, ds_m):
-        """
-        Mapper này gom tất cả thông tin từ các Model joined lại thành một Dictionary.
-        Service sẽ nhận cái này và trả về cho Frontend.
-        """
         if not doctor_m:
             return None
 
         return {
-            # ID các thực thể
-            "doctor_id": doctor_m.id,
-            "specialty_id": spec_m.id,
-            "clinic_id": clinic_m.id,
+            "id": doctor_m.id,
 
-            # Thông tin định danh
-            "doctor_name": user_m.full_name if user_m else "N/A",
-            "specialty_name": spec_m.name if spec_m else "N/A",
-            "clinic_name": clinic_m.name if clinic_m else "N/A",
+            "name": user_m.full_name if user_m else "N/A",
+            "avatar": getattr(user_m, "avatar_url", None),
 
-            # Thông tin chuyên môn
-            "experience_years": doctor_m.experience_years,
-            "rating_avg": doctor_m.rating_avg,
-            "total_reviews": doctor_m.total_reviews,
+            "specialty": spec_m.name if spec_m else "N/A",
+            "specialty_id": spec_m.id if spec_m else None,
 
-            # Thông tin tài chính
-            "consultation_fee": float(ds_m.consultation_fee) if ds_m else 0
+            "clinic": clinic_m.name if clinic_m else "N/A",
+            "clinic_id": clinic_m.id if clinic_m else None,
+            "clinic_address": clinic_m.address if clinic_m else None,
+
+            "experience": doctor_m.experience_years,
+            "rating": doctor_m.rating_avg,
+            "reviewCount": doctor_m.total_reviews,
+
+            "price": float(ds_m.consultation_fee) if ds_m else 0,
+
+            "languages": [],
+            "acceptsInsurance": False,
+            "isOnline": True
         }
