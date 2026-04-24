@@ -5,10 +5,10 @@ from app.infrastructure.models import TimeSlotModel
 class TimeSlotMapper:
     @staticmethod
     def model_to_entity(model):
-        is_busy = (
-                model.appointment is not None and
-                model.appointment.status in ["PENDING", "CONFIRMED"]
-        )
+        # is_busy = (
+        #         model.appointment is not None and
+        #         model.appointment.status in ["PENDING", "CONFIRMED"]
+        # )
         return TimeSlot(
             id=model.id,
             doctor_id = model.doctor_id,
@@ -16,7 +16,7 @@ class TimeSlotMapper:
             date = model.date,
             start_time = model.start_time,
             end_time = model.end_time,
-            is_available = not is_busy
+            is_available = model.is_available
         )
 
     # @staticmethod
