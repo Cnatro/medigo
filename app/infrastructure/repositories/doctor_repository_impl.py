@@ -84,4 +84,4 @@ class DoctorRepositoryImpl(DoctorRepository):
         db.session.commit()
         db.session.refresh(model)
 
-        return DoctorMapper.model_to_entity(model)
+        return DoctorMapper.mgodel_to_entity(model)

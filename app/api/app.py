@@ -10,6 +10,7 @@ from app.interfaces.routes.clinic_routes import clinic_bp
 from app.interfaces.routes.doctor_routes import doctor_bp
 from app.interfaces.routes.order_routes import order_bp
 from app.interfaces.routes.specialty_routes import specialty_bp
+from app.interfaces.routes.time_slot_routes import time_slot_bp
 from app.interfaces.routes.user_routes import user_bp
 
 load_dotenv()
@@ -55,6 +56,7 @@ def create_app():
     app.register_blueprint(doctor_bp, url_prefix="/api/doctors")
     app.register_blueprint(clinic_bp, url_prefix="/api/clinics")
     app.register_blueprint(specialty_bp, url_prefix="/api/specialties")
+    app.register_blueprint(time_slot_bp, url_prefix="/api/time_slots")
 
     app.logger.info("App initialized")
 

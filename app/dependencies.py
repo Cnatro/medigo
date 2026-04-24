@@ -12,6 +12,7 @@ from app.core.services.order_command_service import OrderCommandService
 from app.core.services.order_query_service import OrderQueryService
 from app.core.services.payment.momo_service import MomoService
 from app.core.services.specialtie_query_service import SpecialtyQueryService
+from app.core.services.time_slot_query_service import TimeSlotQueryService
 from app.core.services.user_command_service import UserCommandService
 from app.core.services.user_query_service import UserQueryService
 from app.infrastructure.repositories.clinic_repository_impl import ClinicRepositoryImpl
@@ -20,6 +21,7 @@ from app.infrastructure.repositories.order_repository_impl import OrderRepositor
 from app.infrastructure.repositories.patient_repository_impl import PatientRepositoryImpl
 from app.infrastructure.repositories.payment_history_repository_impl import PaymentHistoryRepositoryImpl
 from app.infrastructure.repositories.specialtie_repository_impl import SpecialtyRepositoryImpl
+from app.infrastructure.repositories.time_slot_repository_impl import TimeSlotRepositoryImpl
 from app.infrastructure.repositories.user_repository_impl import UserRepositoryImpl
 from app.shared.utils.role import Role
 
@@ -87,7 +89,6 @@ def get_order_query_service():
         order_repo=get_order_repo()
     )
 
-
 def get_doctor_query_service():
     return DoctorQueryService(
         doctor_repo=DoctorRepositoryImpl()
@@ -121,6 +122,11 @@ def get_specialty_query_service():
 def get_specialty_command_service():
     return SpecialtyQueryService(
         specialty_repo=SpecialtyRepositoryImpl()
+    )
+
+def get_time_slot_query_service():
+    return TimeSlotQueryService(
+        time_slot_repo=TimeSlotRepositoryImpl()
     )
 
 def init_cloudinary():
