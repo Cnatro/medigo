@@ -10,3 +10,6 @@ class PatientRepository(ABC):
 
     @abstractmethod
     def find_by_user_id(self, user_id): pass
+
+    @abstractmethod
+    def update_patient_by_user_id(self, user_id, data): pass

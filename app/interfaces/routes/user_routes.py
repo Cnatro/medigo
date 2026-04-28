@@ -1,7 +1,7 @@
 from flask import Blueprint
 from flask_jwt_extended import verify_jwt_in_request
 
-from app.dependencies import get_user_query_service
+from app.dependencies import get_user_query_service, get_user_command_service
 from app.interfaces.controllers.user_controller import UserController
 
 user_bp = Blueprint("users",__name__)
@@ -11,7 +11,9 @@ def authenticated():
     verify_jwt_in_request()
 
 controller = UserController(
-    user_query_service= get_user_query_service()
+    user_query_service= get_user_query_service(),
+    user_command_service=get_user_command_service()
 )
 
 user_bp.route("/me",methods=["GET"]) (controller.get_current_user)
+user_bp.route("/me", methods=["PATCH"])(controller.update_profile)

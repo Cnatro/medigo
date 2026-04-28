@@ -10,15 +10,12 @@ class DoctorQueryService:
     def get_filter_doctors(self, params):
         results = self.doctor_repo.find_doctor_by_filter(params=params)
 
-        if not results :
-            return None, MessageCode.FAIL
+        return list(results.values()), MessageCode.SUCCESS
 
-        return results, MessageCode.SUCCESS
-
-    def get_doctor_by_id(self, id, specialty_id):
-        data = self.doctor_repo.get_doctor_profile_for_service(doctor_id= id, specialty_id= specialty_id)
+    def get_doctor_by_id(self, id):
+        data = self.doctor_repo.get_doctor_profile_for_service(doctor_id= id)
 
         if not data :
             return None, MessageCode.FAIL
 
-        return data, MessageCode.SUCCESS
+        return next(iter(data.values()), None), MessageCode.SUCCESS
