@@ -6,11 +6,12 @@ from app.shared.utils.message_code import MessageCode, STATUS_MAP
 class ApiResponse:
 
     @staticmethod
-    def success(messageCode, data=None):
+    def success(messageCode, data=None, subData=None):
         return jsonify({
             "status": "success",
             "messageCode": str(messageCode.name),
-            "data": _safe_json(data)
+            "data": _safe_json(data),
+            **(subData or {})
         }), STATUS_MAP.get(messageCode, 200)
 
     @staticmethod
