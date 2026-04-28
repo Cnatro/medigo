@@ -10,8 +10,7 @@ class SpecialtyModel(db.Model):
     description = db.Column(db.Text)
     embedding = db.Column(db.Text)
 
-    doctors = db.relationship(
-        "DoctorModel",
-        secondary="doctor_specialties",
-        backref="specialties"
+    doctor_specialties = db.relationship(
+        "DoctorSpecialtyModel",
+        back_populates="specialty"
     )

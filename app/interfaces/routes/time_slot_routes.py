@@ -15,4 +15,4 @@ controller: TimeSlotController = TimeSlotController(
     time_slot_query_service= get_time_slot_query_service(),
 )
 
-time_slot_bp.route("/<doctor_id>/slots", methods=["GET"])(controller.get_slots)
+time_slot_bp.route("/<doctor_specialty_id>/slots", methods=["GET"])(controller.get_slots)

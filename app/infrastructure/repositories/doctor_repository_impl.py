@@ -11,21 +11,20 @@ from app.interfaces.mappers.doctor_mapper import DoctorMapper
 
 class DoctorRepositoryImpl(DoctorRepository):
 
-    def get_doctor_profile_for_service(self, doctor_id, specialty_id):
+    def get_doctor_profile_for_service(self, doctor_id):
         result = db.session.query(
             DoctorModel, UserModel, ClinicModel, SpecialtyModel, DoctorSpecialtyModel
         ).join(UserModel, UserModel.id == DoctorModel.user_id) \
             .join(ClinicModel, ClinicModel.id == DoctorModel.clinic_id) \
             .join(DoctorSpecialtyModel, DoctorSpecialtyModel.doctor_id == DoctorModel.id) \
             .join(SpecialtyModel, SpecialtyModel.id == DoctorSpecialtyModel.specialty_id) \
-            .filter(DoctorModel.id == doctor_id) \
-            .filter(SpecialtyModel.id == specialty_id) \
-            .first()
+            .filter(DoctorModel.id == doctor_id)\
+            .all()
 
         if not result:
             return None
 
-        return DoctorMapper.model_to_full_info_dict(*result)
+        return DoctorMapper.map_doctors(result)
 
     @override
     def find_doctor_by_filter(self, params):
@@ -39,18 +38,13 @@ class DoctorRepositoryImpl(DoctorRepository):
             .join(ClinicModel, ClinicModel.id == DoctorModel.clinic_id) \
             .join(DoctorSpecialtyModel, DoctorSpecialtyModel.doctor_id == DoctorModel.id) \
             .join(SpecialtyModel, SpecialtyModel.id == DoctorSpecialtyModel.specialty_id) \
-            .distinct(DoctorModel.id)
+            .order_by(DoctorModel.id)
 
         query = DoctorFilter(query, params).apply()
 
         results = query.all()
 
-        return [
-            DoctorMapper.model_to_full_info_dict(
-                doc, user, clinic, spec, ds
-            )
-            for doc, user, clinic, spec, ds in results
-        ]
+        return DoctorMapper.map_doctors(results)
 
     @override
     def save(self, doctor: Doctor):

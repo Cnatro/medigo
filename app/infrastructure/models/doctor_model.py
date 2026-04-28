@@ -19,6 +19,8 @@ class DoctorModel(db.Model):
     user = db.relationship("UserModel", back_populates="doctor")
     clinic = db.relationship("ClinicModel", back_populates="doctors")
 
-    schedules = db.relationship("DoctorScheduleModel", backref="doctor")
-    time_slots = db.relationship("TimeSlotModel", backref="doctor")
     appointments = db.relationship("AppointmentModel", backref="doctor")
+    doctor_specialties = db.relationship(
+        "DoctorSpecialtyModel",
+        back_populates="doctor"
+    )

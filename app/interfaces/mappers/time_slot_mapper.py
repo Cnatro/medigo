@@ -11,7 +11,7 @@ class TimeSlotMapper:
         # )
         return TimeSlot(
             id=model.id,
-            doctor_id = model.doctor_id,
+            doctor_specialty_id = model.doctor_specialty_id,
             schedule_id = model.schedule_id,
             date = model.date,
             start_time = model.start_time,

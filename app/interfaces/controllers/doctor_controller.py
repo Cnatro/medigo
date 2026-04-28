@@ -20,15 +20,11 @@ class DoctorController:
 
         result, code = self.doctor_query_service.get_filter_doctors(params)
 
-        if not result:
-            return ApiResponse.not_found(code, result)
-
         return ApiResponse.success(code, result)
 
     def get_doctor_by_id(self, id):
-        specialty_id = request.args.get('specialty_id')
 
-        data, code = self.doctor_query_service.get_doctor_by_id(id=id, specialty_id=specialty_id)
+        data, code = self.doctor_query_service.get_doctor_by_id(id=id)
 
         if not data:
             return ApiResponse.not_found(code, data)

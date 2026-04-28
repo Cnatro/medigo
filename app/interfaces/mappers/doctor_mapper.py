@@ -71,30 +71,38 @@ class DoctorMapper:
         )
 
     @staticmethod
-    def model_to_full_info_dict(doctor_m, user_m, clinic_m, spec_m, ds_m):
-        if not doctor_m:
-            return None
+    def map_doctors(rows):
+        result = {}
 
-        return {
-            "id": doctor_m.id,
+        for doctor_m, user_m, clinic_m, spec_m, ds_m in rows:
 
-            "name": user_m.full_name if user_m else "N/A",
-            "avatar": getattr(user_m, "avatar_url", None),
+            if doctor_m.id not in result:
+                result[doctor_m.id] = {
+                    "id": doctor_m.id,
 
-            "specialty": spec_m.name if spec_m else "N/A",
-            "specialty_id": spec_m.id if spec_m else None,
+                    "name": user_m.full_name if user_m else "N/A",
+                    "avatar": getattr(user_m, "avatar_url", None),
 
-            "clinic": clinic_m.name if clinic_m else "N/A",
-            "clinic_id": clinic_m.id if clinic_m else None,
-            "clinic_address": clinic_m.address if clinic_m else None,
+                    "clinic": clinic_m.name if clinic_m else "N/A",
+                    "clinic_id": clinic_m.id if clinic_m else None,
+                    "clinic_address": clinic_m.address if clinic_m else None,
 
-            "experience": doctor_m.experience_years,
-            "rating": doctor_m.rating_avg,
-            "reviewCount": doctor_m.total_reviews,
+                    "experience": doctor_m.experience_years,
+                    "rating": doctor_m.rating_avg,
+                    "reviewCount": doctor_m.total_reviews,
 
-            "price": float(ds_m.consultation_fee) if ds_m else 0,
+                    "languages": [],
+                    "acceptsInsurance": False,
+                    "isOnline": True,
 
-            "languages": [],
-            "acceptsInsurance": False,
-            "isOnline": True
-        }
+                    "specialties": []
+                }
+
+            result[doctor_m.id]["specialties"].append({
+                "id": spec_m.id if spec_m else None,
+                "name": spec_m.name if spec_m else "N/A",
+                "price": float(ds_m.consultation_fee) if ds_m else 0,
+                "doctor_specialty_id": ds_m.id
+            })
+
+        return result

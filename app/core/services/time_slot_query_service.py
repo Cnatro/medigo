@@ -7,8 +7,8 @@ class TimeSlotQueryService:
     def __init__(self, time_slot_repo: TimeSlotRepository):
        self.time_slot_repo = time_slot_repo
 
-    def get_schedule(self, doctor_id, start_date, end_date):
-        slots = self.time_slot_repo.get_slots_by_doctor_and_date_range(doctor_id, start_date, end_date)
+    def get_schedule(self, doctor_specialty_id, start_date, end_date):
+        slots = self.time_slot_repo.get_slots_by_doctor_and_date_range(doctor_specialty_id, start_date, end_date)
 
         schedule_by_date = {}
         for slot in slots:

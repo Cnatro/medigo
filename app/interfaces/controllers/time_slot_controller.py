@@ -14,7 +14,7 @@ class TimeSlotController:
     def __init__(self, time_slot_query_service: TimeSlotQueryService):
         self.time_slot_query_service = time_slot_query_service
 
-    def get_slots(self, doctor_id):
+    def get_slots(self, doctor_specialty_id):
         start_date_str = request.args.get("start_date")
         end_date_str = request.args.get("end_date")
 
@@ -27,6 +27,6 @@ class TimeSlotController:
         except ValueError:
             return ApiResponse.error(MessageCode.INVALID_DATA)
 
-        data = self.time_slot_query_service.get_schedule(doctor_id, start_date, end_date)
+        data = self.time_slot_query_service.get_schedule(doctor_specialty_id, start_date, end_date)
 
         return ApiResponse.success(MessageCode.SUCCESS, data)

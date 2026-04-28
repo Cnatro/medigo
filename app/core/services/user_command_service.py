@@ -1,6 +1,6 @@
 from flask_jwt_extended import get_jwt_identity
 from passlib.hash import argon2
-from pyexpat.errors import messages
+
 
 from app.core.entities.user import User
 from app.core.services.cloudinary.cloudinary_service import CloudinaryService
