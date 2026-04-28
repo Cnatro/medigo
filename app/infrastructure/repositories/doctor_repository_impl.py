@@ -7,6 +7,7 @@ from app.infrastructure.db import db
 from app.infrastructure.models import DoctorModel, ClinicModel, ReviewModel, SpecialtyModel, DoctorSpecialtyModel, \
     UserModel
 from app.interfaces.mappers.doctor_mapper import DoctorMapper
+from sqlalchemy import case
 
 
 class DoctorRepositoryImpl(DoctorRepository):
@@ -18,7 +19,7 @@ class DoctorRepositoryImpl(DoctorRepository):
             .join(ClinicModel, ClinicModel.id == DoctorModel.clinic_id) \
             .join(DoctorSpecialtyModel, DoctorSpecialtyModel.doctor_id == DoctorModel.id) \
             .join(SpecialtyModel, SpecialtyModel.id == DoctorSpecialtyModel.specialty_id) \
-            .filter(DoctorModel.id == doctor_id)\
+            .filter(DoctorModel.id == doctor_id) \
             .all()
 
         if not result:
@@ -28,7 +29,30 @@ class DoctorRepositoryImpl(DoctorRepository):
 
     @override
     def find_doctor_by_filter(self, params):
-        query = db.session.query(
+
+        base_query = db.session.query(
+            DoctorModel.id
+        ).join(UserModel, UserModel.id == DoctorModel.user_id) \
+            .join(ClinicModel, ClinicModel.id == DoctorModel.clinic_id) \
+            .join(DoctorSpecialtyModel, DoctorSpecialtyModel.doctor_id == DoctorModel.id) \
+            .join(SpecialtyModel, SpecialtyModel.id == DoctorSpecialtyModel.specialty_id)
+
+        filter_obj = DoctorFilter(base_query, params)
+        query = filter_obj.apply()
+
+        page, size, offset = filter_obj.apply_pagination()
+
+        doctor_cte = query \
+            .order_by(None)\
+            .with_entities(DoctorModel.id) \
+            .distinct() \
+            .offset(offset) \
+            .limit(size) \
+            .cte("doctor_pagination")
+
+        total = query.order_by(None).with_entities(DoctorModel.id).distinct().count()
+
+        final_query = db.session.query(
             DoctorModel,
             UserModel,
             ClinicModel,
@@ -38,13 +62,27 @@ class DoctorRepositoryImpl(DoctorRepository):
             .join(ClinicModel, ClinicModel.id == DoctorModel.clinic_id) \
             .join(DoctorSpecialtyModel, DoctorSpecialtyModel.doctor_id == DoctorModel.id) \
             .join(SpecialtyModel, SpecialtyModel.id == DoctorSpecialtyModel.specialty_id) \
-            .order_by(DoctorModel.id)
+            .join(doctor_cte, doctor_cte.c.id == DoctorModel.id)
 
-        query = DoctorFilter(query, params).apply()
+        ordering_ids = [row[0] for row in db.session.query(doctor_cte.c.id).all()]
 
-        results = query.all()
+        ordering = case(
+            {id: index for index, id in enumerate(ordering_ids)},
+            value=DoctorModel.id
+        )
 
-        return DoctorMapper.map_doctors(results)
+        final_query = final_query.order_by(ordering)
+
+        results = final_query.all()
+
+        mapped = DoctorMapper.map_doctors(results)
+
+        return {
+            "data": list(mapped.values()),
+            "total": total,
+            "page": page,
+            "size": size
+        }
 
     @override
     def save(self, doctor: Doctor):

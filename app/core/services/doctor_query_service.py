@@ -8,9 +8,9 @@ class DoctorQueryService:
         self.doctor_repo = doctor_repo
 
     def get_filter_doctors(self, params):
-        results = self.doctor_repo.find_doctor_by_filter(params=params)
+        result  = self.doctor_repo.find_doctor_by_filter(params=params)
 
-        return list(results.values()), MessageCode.SUCCESS
+        return result , MessageCode.SUCCESS
 
     def get_doctor_by_id(self, id):
         data = self.doctor_repo.get_doctor_profile_for_service(doctor_id= id)

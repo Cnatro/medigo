@@ -20,7 +20,13 @@ class DoctorController:
 
         result, code = self.doctor_query_service.get_filter_doctors(params)
 
-        return ApiResponse.success(code, result)
+        response_data = {
+            "total": result["total"],
+            "page": result["page"],
+            "size": result["size"]
+        }
+
+        return ApiResponse.success(code, data=result["data"],subData=response_data)
 
     def get_doctor_by_id(self, id):
 

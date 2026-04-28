@@ -30,6 +30,20 @@ class DoctorFilter:
 
         return [value]
 
+    def apply_pagination(self):
+        page = int(self.get_single("page", 1))
+        size = int(self.get_single("size", 6))
+
+        if page < 1:
+            page = 1
+
+        if size <= 0:
+            size = 6
+
+        offset = (page - 1) * size
+
+        return page, size, offset
+
     def apply(self):
 
         search = self.get_single("search").strip()
