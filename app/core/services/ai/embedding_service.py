@@ -2,7 +2,6 @@ from google import genai
 from huggingface_hub import InferenceClient
 
 from app.config import Config
-import json
 
 client_gemini = genai.Client(api_key=Config.GEMINI_API_KEY)
 
