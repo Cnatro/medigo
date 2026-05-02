@@ -19,3 +19,6 @@ class DoctorRepository(ABC):
 
     @abstractmethod
     def update_doctor_by_user_id(self, user_id, data): pass
+
+    @abstractmethod
+    def find_doctors_by_specialty_ids(self, specialty_ids, limit=5): pass

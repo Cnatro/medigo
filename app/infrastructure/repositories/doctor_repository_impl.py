@@ -7,7 +7,7 @@ from app.infrastructure.db import db
 from app.infrastructure.models import DoctorModel, ClinicModel, ReviewModel, SpecialtyModel, DoctorSpecialtyModel, \
     UserModel
 from app.interfaces.mappers.doctor_mapper import DoctorMapper
-from sqlalchemy import case
+from sqlalchemy import case, text
 
 
 class DoctorRepositoryImpl(DoctorRepository):
@@ -43,7 +43,7 @@ class DoctorRepositoryImpl(DoctorRepository):
         page, size, offset = filter_obj.apply_pagination()
 
         doctor_cte = query \
-            .order_by(None)\
+            .order_by(None) \
             .with_entities(DoctorModel.id) \
             .distinct() \
             .offset(offset) \
@@ -117,3 +117,31 @@ class DoctorRepositoryImpl(DoctorRepository):
         db.session.refresh(model)
 
         return DoctorMapper.mgodel_to_entity(model)
+
+    @override
+    def find_doctors_by_specialty_ids(self, specialty_ids, limit=5):
+        query = text("""
+                    SELECT DISTINCT d.id,
+                           u.full_name,
+                           d.rating_avg,
+                           d.experience_years,
+                           c.name AS clinic_name
+                    FROM doctors d
+                    JOIN users u ON u.id = d.user_id
+                    JOIN clinics c ON c.id = d.clinic_id
+                    JOIN doctor_specialties ds ON ds.doctor_id = d.id
+                    --JOIN time_slots ts ON ts.doctor_specialty_id = ds.id
+
+                    WHERE ds.specialty_id = ANY(:specialty_ids)
+                     --AND ts.is_available = TRUE
+
+                    ORDER BY d.rating_avg DESC, d.experience_years DESC
+                    LIMIT :limit
+                """)
+
+        result = db.session.execute(query, {
+            "specialty_ids": specialty_ids,
+            "limit": limit
+        }).fetchall()
+
+        return result
