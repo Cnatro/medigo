@@ -13,7 +13,7 @@ class SpecialtyMapper:
             id=model.id,
             name=model.name,
             description=model.description,
-            embedding=model.embedding
+            embedding=""
         )
 
     @staticmethod
@@ -25,7 +25,7 @@ class SpecialtyMapper:
             id=entity.id,
             name=entity.name,
             description=entity.description,
-            embedding=entity.embedding
+            embedding=""
         )
 
     @staticmethod

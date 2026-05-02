@@ -1,6 +1,10 @@
 import cloudinary
 
 from app.config import Config
+from app.core.services.ai import ranking_service
+from app.core.services.ai.embedding_service import EmbeddingService
+from app.core.services.ai.rag_service import RagService
+from app.core.services.ai.ranking_service import RankingService
 from app.core.services.clinic_command_service import ClinicCommandService
 from app.core.services.clinic_query_service import ClinicQueryService
 from app.core.services.doctor_command_service import DoctorCommandService
@@ -21,8 +25,10 @@ from app.infrastructure.repositories.order_repository_impl import OrderRepositor
 from app.infrastructure.repositories.patient_repository_impl import PatientRepositoryImpl
 from app.infrastructure.repositories.payment_history_repository_impl import PaymentHistoryRepositoryImpl
 from app.infrastructure.repositories.specialtie_repository_impl import SpecialtyRepositoryImpl
+from app.infrastructure.repositories.symptom_repository_impl import SymptomRepositoryImpl
 from app.infrastructure.repositories.time_slot_repository_impl import TimeSlotRepositoryImpl
 from app.infrastructure.repositories.user_repository_impl import UserRepositoryImpl
+from app.infrastructure.repositories.vector_repository_impl import VectorRepositoryImpl
 from app.shared.utils.role import Role
 
 import app.core.services.handle_role
@@ -45,11 +51,13 @@ def get_role_query_handlers():
         Role.PATIENT.name: ROLE_QUERY_HANDLERS[Role.PATIENT.name](PatientRepositoryImpl())
     }
 
+
 def get_role_update_handlers():
     return {
         Role.DOCTOR.name: ROLE_UPDATE_HANDLERS[Role.DOCTOR.name](DoctorRepositoryImpl()),
         Role.PATIENT.name: ROLE_UPDATE_HANDLERS[Role.PATIENT.name](PatientRepositoryImpl()),
     }
+
 
 def get_user_command_service():
     repo = get_user_repo()
@@ -89,6 +97,7 @@ def get_order_query_service():
         order_repo=get_order_repo()
     )
 
+
 def get_doctor_query_service():
     return DoctorQueryService(
         doctor_repo=DoctorRepositoryImpl()
@@ -124,14 +133,27 @@ def get_specialty_command_service():
         specialty_repo=SpecialtyRepositoryImpl()
     )
 
+
 def get_time_slot_query_service():
     return TimeSlotQueryService(
         time_slot_repo=TimeSlotRepositoryImpl()
     )
+
 
 def init_cloudinary():
     cloudinary.config(
         cloud_name=Config.CLOUDINARY_CLOUD_NAME,
         api_key=Config.CLOUDINARY_API_KEY,
         api_secret=Config.CLOUDINARY_API_SECRET
+    )
+
+
+def get_rag_service():
+    return RagService(
+        embed_service=EmbeddingService(),
+        vector_repo=VectorRepositoryImpl(),
+        doctor_repo=DoctorRepositoryImpl(),
+        symptom_repo=SymptomRepositoryImpl(),
+        specialty_repo=SpecialtyRepositoryImpl(),
+        ranking_service=RankingService()
     )

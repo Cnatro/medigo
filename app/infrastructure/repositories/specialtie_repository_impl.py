@@ -19,3 +19,13 @@ class SpecialtyRepositoryImpl(SpecialtyRepository):
             SpecialtyMapper.model_to_entity(m)
             for m in models
         ]
+
+    @override
+    def find_names_by_ids(self, ids):
+        models = SpecialtyModel.query.filter(
+            SpecialtyModel.id.in_(ids)
+        ).all()
+
+        return [
+            SpecialtyMapper.model_to_entity(m) for m in models
+        ]
