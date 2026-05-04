@@ -5,6 +5,7 @@ from app.core.services.ai import ranking_service
 from app.core.services.ai.embedding_service import EmbeddingService
 from app.core.services.ai.rag_service import RagService
 from app.core.services.ai.ranking_service import RankingService
+from app.core.services.appointment_command_service import AppointmentCommandService
 from app.core.services.clinic_command_service import ClinicCommandService
 from app.core.services.clinic_query_service import ClinicQueryService
 from app.core.services.doctor_command_service import DoctorCommandService
@@ -19,6 +20,7 @@ from app.core.services.specialtie_query_service import SpecialtyQueryService
 from app.core.services.time_slot_query_service import TimeSlotQueryService
 from app.core.services.user_command_service import UserCommandService
 from app.core.services.user_query_service import UserQueryService
+from app.infrastructure.repositories.appointment_repository_impl import AppointmentRepositoryImpl
 from app.infrastructure.repositories.clinic_repository_impl import ClinicRepositoryImpl
 from app.infrastructure.repositories.doctor_repository_impl import DoctorRepositoryImpl
 from app.infrastructure.repositories.order_repository_impl import OrderRepositoryImpl
@@ -156,4 +158,10 @@ def get_rag_service():
         symptom_repo=SymptomRepositoryImpl(),
         specialty_repo=SpecialtyRepositoryImpl(),
         ranking_service=RankingService()
+    )
+
+def get_appointment_command_service():
+    return AppointmentCommandService(
+        appointment_repo= AppointmentRepositoryImpl(),
+        time_slot_repo= TimeSlotRepositoryImpl(),
     )
