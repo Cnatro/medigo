@@ -6,6 +6,7 @@ from app.core.services.ai.embedding_service import EmbeddingService
 from app.core.services.ai.rag_service import RagService
 from app.core.services.ai.ranking_service import RankingService
 from app.core.services.appointment_command_service import AppointmentCommandService
+from app.core.services.appointment_query_service import AppointmentQueryService
 from app.core.services.clinic_command_service import ClinicCommandService
 from app.core.services.clinic_query_service import ClinicQueryService
 from app.core.services.doctor_command_service import DoctorCommandService
@@ -168,6 +169,11 @@ def get_appointment_command_service():
     return AppointmentCommandService(
         appointment_repo= AppointmentRepositoryImpl(),
         time_slot_repo= TimeSlotRepositoryImpl(),
+    )
+
+def get_appointment_query_service():
+    return AppointmentQueryService(
+        appointment_repo= AppointmentRepositoryImpl(),
     )
 
 def get_time_slot_command_service():
