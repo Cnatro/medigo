@@ -1,6 +1,10 @@
 import cloudinary
 
 from app.config import Config
+from app.core.services.ai import ranking_service
+from app.core.services.ai.embedding_service import EmbeddingService
+from app.core.services.ai.rag_service import RagService
+from app.core.services.ai.ranking_service import RankingService
 from app.core.services.clinic_command_service import ClinicCommandService
 from app.core.services.clinic_query_service import ClinicQueryService
 from app.core.services.doctor_command_service import DoctorCommandService
@@ -11,7 +15,10 @@ from app.core.services.handle_role.update_registry import ROLE_UPDATE_HANDLERS
 from app.core.services.order_command_service import OrderCommandService
 from app.core.services.order_query_service import OrderQueryService
 from app.core.services.payment.momo_service import MomoService
+from app.core.services.schedule_command_service import ScheduleCommandService
+from app.core.services.schedule_query_service import ScheduleQueryService
 from app.core.services.specialtie_query_service import SpecialtyQueryService
+from app.core.services.time_slot_command_service import TimeSlotCommandService
 from app.core.services.time_slot_query_service import TimeSlotQueryService
 from app.core.services.user_command_service import UserCommandService
 from app.core.services.user_query_service import UserQueryService
@@ -20,9 +27,12 @@ from app.infrastructure.repositories.doctor_repository_impl import DoctorReposit
 from app.infrastructure.repositories.order_repository_impl import OrderRepositoryImpl
 from app.infrastructure.repositories.patient_repository_impl import PatientRepositoryImpl
 from app.infrastructure.repositories.payment_history_repository_impl import PaymentHistoryRepositoryImpl
+from app.infrastructure.repositories.schedule_repository_impl import ScheduleRepositoryImpl
 from app.infrastructure.repositories.specialtie_repository_impl import SpecialtyRepositoryImpl
+from app.infrastructure.repositories.symptom_repository_impl import SymptomRepositoryImpl
 from app.infrastructure.repositories.time_slot_repository_impl import TimeSlotRepositoryImpl
 from app.infrastructure.repositories.user_repository_impl import UserRepositoryImpl
+from app.infrastructure.repositories.vector_repository_impl import VectorRepositoryImpl
 from app.shared.utils.role import Role
 
 import app.core.services.handle_role
@@ -45,11 +55,13 @@ def get_role_query_handlers():
         Role.PATIENT.name: ROLE_QUERY_HANDLERS[Role.PATIENT.name](PatientRepositoryImpl())
     }
 
+
 def get_role_update_handlers():
     return {
         Role.DOCTOR.name: ROLE_UPDATE_HANDLERS[Role.DOCTOR.name](DoctorRepositoryImpl()),
         Role.PATIENT.name: ROLE_UPDATE_HANDLERS[Role.PATIENT.name](PatientRepositoryImpl()),
     }
+
 
 def get_user_command_service():
     repo = get_user_repo()
@@ -89,6 +101,7 @@ def get_order_query_service():
         order_repo=get_order_repo()
     )
 
+
 def get_doctor_query_service():
     return DoctorQueryService(
         doctor_repo=DoctorRepositoryImpl()
@@ -124,14 +137,49 @@ def get_specialty_command_service():
         specialty_repo=SpecialtyRepositoryImpl()
     )
 
+
 def get_time_slot_query_service():
     return TimeSlotQueryService(
         time_slot_repo=TimeSlotRepositoryImpl()
     )
+
 
 def init_cloudinary():
     cloudinary.config(
         cloud_name=Config.CLOUDINARY_CLOUD_NAME,
         api_key=Config.CLOUDINARY_API_KEY,
         api_secret=Config.CLOUDINARY_API_SECRET
+    )
+
+
+def get_rag_service():
+    return RagService(
+        embed_service=EmbeddingService(),
+        vector_repo=VectorRepositoryImpl(),
+        doctor_repo=DoctorRepositoryImpl(),
+        symptom_repo=SymptomRepositoryImpl(),
+        specialty_repo=SpecialtyRepositoryImpl(),
+        ranking_service=RankingService()
+    )
+
+
+def get_time_slot_command_service():
+    return TimeSlotCommandService(
+        time_slot_repo=TimeSlotRepositoryImpl()
+    )
+
+
+def get_schedule_command_service():
+    return ScheduleCommandService(
+        doctor_repo=DoctorRepositoryImpl(),
+        schedule_repo=ScheduleRepositoryImpl(),
+        timeslot_command_service=get_time_slot_command_service()
+    )
+
+
+def get_schedule_query_service():
+    return ScheduleQueryService(
+        schedule_repo=ScheduleRepositoryImpl(),
+        user_repo=UserRepositoryImpl(),
+        time_slot_repo=TimeSlotRepositoryImpl()
     )

@@ -106,3 +106,45 @@ class DoctorMapper:
             })
 
         return result
+
+    @staticmethod
+    def entity_to_dict(entity: Doctor) -> dict:
+        if not entity:
+            return None
+
+        return {
+            "id": entity.id,
+            "user_id": entity.user_id,
+            "bio": entity.bio,
+            "experience": entity.experience_years,
+            "clinic_id": entity.clinic_id,
+            "rating": entity.rating_avg,
+            "reviewCount": entity.total_reviews,
+            "embedding": entity.embedding,
+            "created_at": entity.created_at,
+
+            # # optional field (scheduler / API enrichment)
+            # "specialties": getattr(entity, "specialties", [])
+        }
+
+    @staticmethod
+    def dict_to_entity(data: dict):
+        if not data:
+            return None
+
+        doctor = Doctor(
+            id=data.get("id"),
+            user_id=data.get("user_id"),
+            bio=data.get("bio"),
+            experience_years=data.get("experience"),
+            clinic_id=data.get("clinic_id"),
+            rating_avg=data.get("rating"),
+            total_reviews=data.get("reviewCount"),
+            embedding=data.get("embedding"),
+            created_at=data.get("created_at"),
+        )
+
+        # # attach specialties as domain field (if your entity supports it)
+        # doctor.specialties = data.get("specialties", [])
+
+        return doctor

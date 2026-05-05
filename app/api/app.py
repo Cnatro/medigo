@@ -9,6 +9,8 @@ from app.interfaces.routes.auth_routes import auth_bp
 from app.interfaces.routes.clinic_routes import clinic_bp
 from app.interfaces.routes.doctor_routes import doctor_bp
 from app.interfaces.routes.order_routes import order_bp
+from app.interfaces.routes.rag_route import rag_bp
+from app.interfaces.routes.schedule_routes import schedule_bp
 from app.interfaces.routes.specialty_routes import specialty_bp
 from app.interfaces.routes.time_slot_routes import time_slot_bp
 from app.interfaces.routes.user_routes import user_bp
@@ -57,6 +59,8 @@ def create_app():
     app.register_blueprint(clinic_bp, url_prefix="/api/clinics")
     app.register_blueprint(specialty_bp, url_prefix="/api/specialties")
     app.register_blueprint(time_slot_bp, url_prefix="/api/time_slots")
+    app.register_blueprint(rag_bp, url_prefix="/api/rag")
+    app.register_blueprint(schedule_bp, url_prefix="/api/schedules")
 
     app.logger.info("App initialized")
 
