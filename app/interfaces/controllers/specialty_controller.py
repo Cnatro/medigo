@@ -5,7 +5,8 @@ from app.shared.utils.api_response import ApiResponse
 
 class SpecialtyController:
 
-    def __init__(self, specialty_query_service: SpecialtyQueryService, specialty_command_service: SpecialtyCommandService):
+    def __init__(self, specialty_query_service: SpecialtyQueryService,
+                 specialty_command_service: SpecialtyCommandService):
         self.specialty_query_service = specialty_query_service
         self.specialty_command_service = specialty_command_service
 
@@ -16,3 +17,8 @@ class SpecialtyController:
             return ApiResponse.not_found(code, result)
 
         return ApiResponse.success(code, result)
+
+    def get_specialties_by_doctor(self):
+        results, code = self.specialty_query_service.get_specialties_by_doctor()
+
+        return ApiResponse.success(messageCode=code, data=results)

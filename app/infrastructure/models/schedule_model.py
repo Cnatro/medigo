@@ -1,5 +1,7 @@
 import uuid
 
+from pygments.lexer import default
+
 from app.infrastructure.db import db
 
 class DoctorScheduleModel(db.Model):
@@ -11,6 +13,9 @@ class DoctorScheduleModel(db.Model):
     start_time = db.Column(db.Time)
     end_time = db.Column(db.Time)
     is_active = db.Column(db.Boolean, default=True)
+    type = db.Column(db.String,default="REGULAR") # REGULAR EXTRA_SHIFT WEEKEND_SHIFT
+    status = db.Column(db.String, default= "ACTIVE") # ACTIVE LEAVE_PENDING LEAVE_APPROVED CANCELLED
+    reason = db.Column(db.Text, default=None)
 
     time_slots = db.relationship("TimeSlotModel", backref="schedule")
     doctor_specialty = db.relationship(
