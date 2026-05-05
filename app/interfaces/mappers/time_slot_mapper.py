@@ -11,12 +11,12 @@ class TimeSlotMapper:
         # )
         return TimeSlot(
             id=model.id,
-            doctor_specialty_id = model.doctor_specialty_id,
-            schedule_id = model.schedule_id,
-            date = model.date,
-            start_time = model.start_time,
-            end_time = model.end_time,
-            is_available = model.is_available
+            doctor_specialty_id=model.doctor_specialty_id,
+            schedule_id=model.schedule_id,
+            date=model.date,
+            start_time=model.start_time,
+            end_time=model.end_time,
+            is_available=model.is_available
         )
 
     # @staticmethod
@@ -42,11 +42,41 @@ class TimeSlotMapper:
             return None
         return TimeSlotModel(
             id=entity.id,
-        doctor_id = entity.doctor_id,
-        schedule_id = entity.schedule_id,
-        date = entity.date,
-        start_time = entity.start_time,
-        end_time = entity.end_time,
-        is_available = entity.is_available
+            doctor_specialty_id=entity.doctor_specialty_id,
+            schedule_id=entity.schedule_id,
+            date=entity.date,
+            start_time=entity.start_time,
+            end_time=entity.end_time,
+            is_available=entity.is_available
         )
 
+    @staticmethod
+    def entity_to_dict(entity):
+        if not entity:
+            return None
+
+        return {
+            "id": entity.id,
+            "doctor_specialty_id": entity.doctor_specialty_id,
+            "schedule_id": entity.schedule_id,
+            "date": str(entity.date) if entity.date else None,
+            "start_time": str(entity.start_time) if entity.start_time else None,
+            "end_time": str(entity.end_time) if entity.end_time else None,
+            "is_available": entity.is_available
+        }
+
+
+    @staticmethod
+    def dict_to_entity(data: dict):
+        if not data:
+            return None
+
+        return TimeSlot(
+            id=data.get("id"),
+            doctor_specialty_id=data.get("doctor_specialty_id"),
+            schedule_id=data.get("schedule_id"),
+            date=data.get("date"),
+            start_time=data.get("start_time"),
+            end_time=data.get("end_time"),
+            is_available=data.get("is_available", True)
+        )

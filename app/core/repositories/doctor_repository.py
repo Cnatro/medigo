@@ -22,3 +22,9 @@ class DoctorRepository(ABC):
 
     @abstractmethod
     def find_doctors_by_specialty_ids(self, specialty_ids, limit=5): pass
+
+    @abstractmethod
+    def get_all_doctor_specialities(self): pass
+
+    @abstractmethod
+    def find_doctor_specialty_by_user_id_and_specialty_id(self, user_id, specialty_id): pass

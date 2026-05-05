@@ -16,3 +16,4 @@ controller = SpecialtyController(
 )
 
 specialty_bp.route("",methods=["GET"])(controller.get_specialties)
+specialty_bp.route("/my-specialties",methods=["GET"])(controller.get_specialties_by_doctor)

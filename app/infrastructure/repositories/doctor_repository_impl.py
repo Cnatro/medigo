@@ -1,13 +1,18 @@
+from select import select
+from sqlalchemy.orm import joinedload
 from typing_extensions import override
 
 from app.core.entities.doctor import Doctor
+from app.core.entities.doctor_specialty import DoctorSpecialty
 from app.core.repositories.doctor_repository import DoctorRepository
 from app.core.services.filter.doctor_filter import DoctorFilter
 from app.infrastructure.db import db
 from app.infrastructure.models import DoctorModel, ClinicModel, ReviewModel, SpecialtyModel, DoctorSpecialtyModel, \
     UserModel
 from app.interfaces.mappers.doctor_mapper import DoctorMapper
-from sqlalchemy import case, text
+from sqlalchemy import case, text, distinct
+
+from app.interfaces.mappers.doctor_specialty_mapper import DoctorSpecialtyMapper
 
 
 class DoctorRepositoryImpl(DoctorRepository):
@@ -145,3 +150,26 @@ class DoctorRepositoryImpl(DoctorRepository):
         }).fetchall()
 
         return result
+
+    @override
+    def get_all_doctor_specialities(self):
+        models = db.session.query(DoctorSpecialtyModel) \
+            .join(DoctorModel) \
+            .options(joinedload(DoctorSpecialtyModel.doctor)) \
+            .all()
+
+        return [DoctorSpecialtyMapper.model_with_clinic_to_dict(m) for m in models]
+
+    @override
+    def find_doctor_specialty_by_user_id_and_specialty_id(self,user_id, specialty_id):
+        model = db.session.query(DoctorSpecialtyModel)\
+            .join(DoctorModel,DoctorModel.id == DoctorSpecialtyModel.doctor_id)\
+            .filter(DoctorModel.user_id == user_id, DoctorSpecialtyModel.specialty_id == specialty_id)\
+            .distinct()\
+            .first()
+
+        if not model:
+            return None
+
+        return DoctorSpecialtyMapper.model_to_entity(model)
+
