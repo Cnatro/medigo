@@ -4,7 +4,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 
-
+from app.interfaces.routes.appointment_routes import appointment_bp
 from app.interfaces.routes.auth_routes import auth_bp
 from app.interfaces.routes.clinic_routes import clinic_bp
 from app.interfaces.routes.doctor_routes import doctor_bp
@@ -60,6 +60,7 @@ def create_app():
     app.register_blueprint(specialty_bp, url_prefix="/api/specialties")
     app.register_blueprint(time_slot_bp, url_prefix="/api/time_slots")
     app.register_blueprint(rag_bp, url_prefix="/api/rag")
+    app.register_blueprint(appointment_bp, url_prefix="/api/appointments")
     app.register_blueprint(schedule_bp, url_prefix="/api/schedules")
 
     app.logger.info("App initialized")

@@ -13,3 +13,11 @@ class TimeSlotRepository(ABC):
 
     @abstractmethod
     def find_time_slots_by_schedule_id(self, schedule_id, doctor_specialty_id): pass
+    @abstractmethod
+    def get_by_id(self, slot_id): pass
+
+    @abstractmethod
+    def mark_unavailable(self, slot_id): pass
+
+    @abstractmethod
+    def get_model_by_id(self, slot_id): pass
