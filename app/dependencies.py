@@ -91,7 +91,7 @@ def get_order_repo():
 
 def get_order_command_service():
     payment_history_repo = PaymentHistoryRepositoryImpl()
-    momo_service = MomoService(payment_repo=payment_history_repo)
+    momo_service = MomoService(payment_repo=payment_history_repo, time_slot_repo=TimeSlotRepositoryImpl())
     return OrderCommandService(
         order_repo=get_order_repo(),
         momo_service=momo_service
@@ -164,11 +164,14 @@ def get_rag_service():
         ranking_service=RankingService()
     )
 
+
 def get_appointment_command_service():
     return AppointmentCommandService(
-        appointment_repo= AppointmentRepositoryImpl(),
-        time_slot_repo= TimeSlotRepositoryImpl(),
+        appointment_repo=AppointmentRepositoryImpl(),
+        time_slot_repo=TimeSlotRepositoryImpl(),
+        order_command_service=get_order_command_service()
     )
+
 
 def get_time_slot_command_service():
     return TimeSlotCommandService(

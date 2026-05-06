@@ -20,7 +20,7 @@ class ScheduleController:
         start_date = request.args.get("start_date")
         end_date = request.args.get("end_date")
 
-        result, code = self.schedule_query_service.get_doctor_schedules(start_date=start_date,end_date=end_date)
+        result, code = self.schedule_query_service.get_doctor_schedules(start_date=start_date, end_date=end_date)
 
         return ApiResponse.success(messageCode=code, data=result)
 
@@ -48,7 +48,7 @@ class ScheduleController:
 
         result, code = self.schedule_command_service.register_extra_shift(data=data)
 
-        return ApiResponse.success(messageCode=code,data=result)
+        return ApiResponse.success(messageCode=code, data=result)
 
     def register_weekend_shift(self):
         data = request.json
@@ -56,3 +56,12 @@ class ScheduleController:
         result, code = self.schedule_command_service.register_weekend_shift(data=data)
 
         return ApiResponse.success(messageCode=code, data=result)
+
+    def get_calendar_appointment(self):
+        start_date = request.args.get("start_date")
+        end_date = request.args.get("end_date")
+        specialty_id = request.args.get("specialty_id")
+
+        results, code = self.schedule_query_service.get_calendar_appointment(start_date, end_date, specialty_id)
+
+        return ApiResponse.success(messageCode=code, data=results)
