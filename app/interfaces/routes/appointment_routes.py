@@ -14,4 +14,4 @@ controller = AppointmentController(
     appointment_command_service= get_appointment_command_service()
 )
 
-appointment_bp.route("/", methods=["POST"])(controller.create)
+appointment_bp.route("", methods=["POST"])(controller.create)

@@ -2,11 +2,13 @@
 
 from flask import request
 from flask_jwt_extended import get_jwt_identity
+
+from app.core.services.appointment_command_service import AppointmentCommandService
 from app.shared.utils.api_response import ApiResponse
 
 class AppointmentController:
 
-    def __init__(self, appointment_command_service):
+    def __init__(self, appointment_command_service : AppointmentCommandService):
         self.appointment_command_service = appointment_command_service
 
     def create(self):
@@ -19,8 +21,4 @@ class AppointmentController:
         if not result:
             return ApiResponse.error(code)
 
-        return ApiResponse.success(code, {
-            "id": result.id,
-            "time_slot_id": result.time_slot_id,
-            "status": result.status
-        })
+        return ApiResponse.created(messageCode=code, data=result)

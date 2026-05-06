@@ -4,7 +4,7 @@ from app.infrastructure.models import AppointmentModel
 
 class AppointmentMapper:
     @staticmethod
-    def model_to_entities(model):
+    def model_to_entity(model):
         return Appointment(
             id=model.id,
             doctor_id= model.doctor_id,
