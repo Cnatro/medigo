@@ -51,6 +51,7 @@ class UserQueryService:
                 "phone": user.phone,
             }, MessageCode.SUCCESS
 
+
         handler = self.role_query_handlers.get(user.role)
 
         if not handler:
