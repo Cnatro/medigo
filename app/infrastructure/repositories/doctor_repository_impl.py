@@ -161,11 +161,11 @@ class DoctorRepositoryImpl(DoctorRepository):
         return [DoctorSpecialtyMapper.model_with_clinic_to_dict(m) for m in models]
 
     @override
-    def find_doctor_specialty_by_user_id_and_specialty_id(self,user_id, specialty_id):
-        model = db.session.query(DoctorSpecialtyModel)\
-            .join(DoctorModel,DoctorModel.id == DoctorSpecialtyModel.doctor_id)\
-            .filter(DoctorModel.user_id == user_id, DoctorSpecialtyModel.specialty_id == specialty_id)\
-            .distinct()\
+    def find_doctor_specialty_by_user_id_and_specialty_id(self, user_id, specialty_id):
+        model = db.session.query(DoctorSpecialtyModel) \
+            .join(DoctorModel, DoctorModel.id == DoctorSpecialtyModel.doctor_id) \
+            .filter(DoctorModel.user_id == user_id, DoctorSpecialtyModel.specialty_id == specialty_id) \
+            .distinct() \
             .first()
 
         if not model:
@@ -173,3 +173,23 @@ class DoctorRepositoryImpl(DoctorRepository):
 
         return DoctorSpecialtyMapper.model_to_entity(model)
 
+    @override
+    def create_doctor_specialties(self, doctor, specialties_ids):
+
+        if specialties_ids:
+            experience_years = doctor.experience_years
+            default_fee = experience_years * 2200
+
+            doctor_specialties = [
+                DoctorSpecialtyModel(
+                    doctor_id=doctor.id,
+                    specialty_id=sid,
+                    consultation_fee=default_fee
+                )
+                for sid in specialties_ids
+            ]
+
+            db.session.add_all(doctor_specialties)
+        db.session.commit()
+
+        return DoctorMapper.model_to_entity(doctor)
