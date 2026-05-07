@@ -4,6 +4,7 @@ from typing import override
 from app.core.entities.doctor import Doctor
 from app.core.entities.patient import Patient
 from app.core.services.handle_role.registry import register_role
+from app.infrastructure.repositories.doctor_repository_impl import DoctorRepositoryImpl
 from app.shared.utils.role import Role
 
 
@@ -17,7 +18,7 @@ class BaseHandle(ABC):
 @register_role(Role.DOCTOR.name)
 class DoctorRoleHandler(BaseHandle):
 
-    def __init__(self, doctor_repo):
+    def __init__(self, doctor_repo: DoctorRepositoryImpl):
         self.doctor_repo = doctor_repo
 
     @override
@@ -32,7 +33,13 @@ class DoctorRoleHandler(BaseHandle):
             total_reviews=0
         )
 
-        self.doctor_repo.save(doctor)
+        saved = self.doctor_repo.save(doctor)
+
+        specialty_ids = profile.get("specialty_ids")
+        if specialty_ids and saved:
+            self.doctor_repo.create_doctor_specialties(doctor=saved, specialties_ids=specialty_ids)
+
+        return saved
 
 
 @register_role(Role.PATIENT.name)

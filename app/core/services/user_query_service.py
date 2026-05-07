@@ -2,6 +2,7 @@ from flask_jwt_extended import create_access_token, get_jwt_identity
 from passlib.handlers.argon2 import argon2
 
 from app.shared.utils.message_code import MessageCode
+from app.shared.utils.role import Role
 
 
 class UserQueryService:
@@ -39,6 +40,17 @@ class UserQueryService:
 
         if not user:
             return None, MessageCode.USER_NOT_FOUND
+
+        if user.role == Role.ADMIN.name:
+            return {
+                "id": user.id,
+                "email": user.email,
+                "full_name": user.full_name,
+                "role": user.role,
+                "avatar_url": user.avatar_url,
+                "phone": user.phone,
+            }, MessageCode.SUCCESS
+
 
         handler = self.role_query_handlers.get(user.role)
 
