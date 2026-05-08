@@ -2,6 +2,8 @@ from sqlalchemy.sql.functions import localtime
 
 from app.infrastructure.repositories.review_repository_impl import ReviewRepositoryImpl
 from app.shared.utils.message_code import MessageCode
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from app.core.entities.review import Review  # thêm import
 
@@ -11,7 +13,6 @@ class ReviewCommandService:
         self.review_repo = review_repo
 
     def review_doctor(self, data: dict, user_id: int):
-        # Validate cơ bản
         required = ['appointment_id', 'doctor_id', 'rating']
         for field in required:
             if field not in data:
@@ -29,7 +30,7 @@ class ReviewCommandService:
             doctor_id=data['doctor_id'],
             rating=rating,
             comment=data.get('comment', ''),
-            created_at=None
+            created_at=datetime.now(ZoneInfo("Asia/Ho_Chi_Minh"))
         )
 
         review_doc = self.review_repo.review_doctor(review_entity, user_id)

@@ -1,3 +1,5 @@
+from sqlalchemy import func
+
 from app.core.entities.review import Review
 from app.core.repositories.review_repository import ReviewRepository
 from app.infrastructure.db import db
@@ -38,7 +40,12 @@ class ReviewRepositoryImpl(ReviewRepository):
         return reviews, paginated.total
 
     def get_doctor_rating_stats(self, doctor_id: str):
-        doctor = DoctorModel.query.get(doctor_id)
-        if not doctor:
-            return None, None
-        return doctor.rating_avg, doctor.total_reviews
+
+        avg, total = db.session.query(
+            func.avg(ReviewModel.rating),
+            func.count(ReviewModel.id)
+        ).filter(
+            ReviewModel.doctor_id == doctor_id
+        ).first()
+
+        return round(float(avg), 1) if avg else 0, total
