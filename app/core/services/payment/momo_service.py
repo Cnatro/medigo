@@ -12,6 +12,7 @@ from app.core.entities.order import Order
 from app.core.entities.payment_transaction import PaymentTransaction
 from app.infrastructure.repositories.order_repository_impl import OrderRepositoryImpl
 from app.infrastructure.repositories.payment_history_repository_impl import PaymentHistoryRepositoryImpl
+from app.infrastructure.repositories.time_slot_repository_impl import TimeSlotRepositoryImpl
 from app.shared.helper.momo_helper import get_result_meta
 from app.shared.utils.message_code import MessageCode
 from app.shared.utils.momo_utils import sign_momo, verify_momo_signature
@@ -22,8 +23,9 @@ log = logging.getLogger(__name__)
 
 class MomoService:
 
-    def __init__(self, payment_repo: PaymentHistoryRepositoryImpl):
+    def __init__(self, payment_repo: PaymentHistoryRepositoryImpl, time_slot_repo: TimeSlotRepositoryImpl):
         self.payment_repo = payment_repo
+        self.time_slot_repo = time_slot_repo
 
     def append_log(self, transaction, status, message, data):
         log_item = {
@@ -38,13 +40,14 @@ class MomoService:
 
         transaction.logs.append(log_item)
 
-    def created_payment(self, order: Order, payment_type: PaymentType):
+    def created_payment(self, order: Order, payment_type: PaymentType, data):
         request_id = str(uuid.uuid4())
         amount = int(order.total_amount)
         transaction_code = f"PAY_{int(time.time())}_{uuid.uuid4()}"
 
         extra_data_dict = {
-            "order_id": order.id
+            "order_id": order.id,
+            "time_slot_id": data["time_slot_id"]
         }
         extra_data = base64.b64encode(json.dumps(extra_data_dict).encode()).decode()
 
@@ -177,6 +180,7 @@ class MomoService:
             )
 
             self.payment_repo.update(transaction)
+            self.time_slot_repo.mark_unavailable(extra_data.get("time_slot_id"))
             return order, MessageCode.PAYMENT_SUCCESS
 
         elif meta["type"] == "PENDING":

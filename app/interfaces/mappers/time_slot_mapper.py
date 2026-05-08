@@ -65,7 +65,6 @@ class TimeSlotMapper:
             "is_available": entity.is_available
         }
 
-
     @staticmethod
     def dict_to_entity(data: dict):
         if not data:
@@ -80,3 +79,35 @@ class TimeSlotMapper:
             end_time=data.get("end_time"),
             is_available=data.get("is_available", True)
         )
+
+    @staticmethod
+    def model_to_dict_calendar_appointment(row):
+        slot, appointment, patient, user, specialty = row
+
+        status = "available"
+
+        if appointment:
+            status = "booked"
+        elif not slot.is_available:
+            status = "closed"
+
+        return {
+            "id": slot.id,
+            "date": slot.date.strftime("%d/%m/%Y") if slot.date else None,
+            "start": slot.start_time.strftime("%H:%M") if slot.start_time else None,
+            "end": slot.end_time.strftime("%H:%M") if slot.end_time else None,
+
+            "status": status,
+
+            "specialtyId": specialty.id if specialty else None,
+            "specialtyName": specialty.name if specialty else None,
+
+            "patient": (
+                {
+                    "id": patient.id,
+                    "name": user.full_name
+                }
+                if patient and user
+                else None
+            )
+        }

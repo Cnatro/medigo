@@ -1,10 +1,11 @@
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import joinedload
+from typing_extensions import override
 
 from app.core.repositories.appointment_repository import AppointmentRepository
-from app.core.repositories.doctor_repository import DoctorRepository
 from app.infrastructure.db import db
 from app.infrastructure.models import AppointmentModel, PatientModel, DoctorModel, DoctorSpecialtyModel
+from app.infrastructure.models import PatientModel
 from app.interfaces.mappers.appointment_mapper import AppointmentMapper
 
 
@@ -23,6 +24,7 @@ class AppointmentRepositoryImpl(AppointmentRepository):
 
         return [AppointmentMapper.model_to_entities(m) for m in models]
 
+    @override
     def create(self, user_id ,appointment):
         patient = PatientModel.query.filter_by(user_id=user_id).first()
         appointment.patient_id = patient.id

@@ -73,7 +73,7 @@ class ScheduleRepositoryImpl(ScheduleRepository):
                 func.count(
                     distinct(
                         case(
-                            (DoctorScheduleModel.status == ScheduleStatus.WEEKEND_APPROVED.name , DoctorScheduleModel.id)
+                            (DoctorScheduleModel.status == ScheduleStatus.WEEKEND_APPROVED.name, DoctorScheduleModel.id)
                         )
                     )
                 ).label("weekend_shift_count"),
@@ -148,3 +148,21 @@ class ScheduleRepositoryImpl(ScheduleRepository):
         db.session.refresh(model)
 
         return ScheduleMapper.model_to_entity(model)
+
+    @override
+    def find_schedule_by_date_and_specialty(self, specialty_id, work_date, shift_type):
+        return (
+            DoctorScheduleModel.query
+            .join(TimeSlotModel, TimeSlotModel.schedule_id == DoctorScheduleModel.id)
+            .join(DoctorSpecialtyModel, DoctorSpecialtyModel.id == DoctorScheduleModel.doctor_specialty_id)
+            .filter(
+                DoctorSpecialtyModel.specialty_id == specialty_id,
+                TimeSlotModel.date == work_date,
+                DoctorScheduleModel.type == shift_type,
+                ~DoctorScheduleModel.status.in_([
+                    ScheduleStatus.EXTRA_REJECTED.name,
+                    ScheduleStatus.WEEKEND_REJECTED.name
+                ])
+            )
+            .first()
+        )

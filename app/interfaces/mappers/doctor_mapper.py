@@ -97,13 +97,18 @@ class DoctorMapper:
 
                     "specialties": []
                 }
+            existing_specialty_ids = {
+                s["id"]
+                for s in result[doctor_m.id]["specialties"]
+            }
 
-            result[doctor_m.id]["specialties"].append({
-                "id": spec_m.id if spec_m else None,
-                "name": spec_m.name if spec_m else "N/A",
-                "price": float(ds_m.consultation_fee) if ds_m else 0,
-                "doctor_specialty_id": ds_m.id
-            })
+            if spec_m.id not in existing_specialty_ids:
+                result[doctor_m.id]["specialties"].append({
+                    "id": spec_m.id,
+                    "name": spec_m.name,
+                    "price": float(ds_m.consultation_fee),
+                    "doctor_specialty_id": ds_m.id
+                })
 
         return result
 

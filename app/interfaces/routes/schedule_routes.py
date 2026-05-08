@@ -4,14 +4,16 @@ from flask_jwt_extended import verify_jwt_in_request
 from app.dependencies import get_schedule_command_service, get_schedule_query_service
 from app.interfaces.controllers.schedule_controller import ScheduleController
 
-schedule_bp = Blueprint("schedules",__name__)
+schedule_bp = Blueprint("schedules", __name__)
+
 
 @schedule_bp.before_request
 def authenticated():
     verify_jwt_in_request()
 
+
 controller: ScheduleController = ScheduleController(
-    schedule_command_service= get_schedule_command_service(),
+    schedule_command_service=get_schedule_command_service(),
     schedule_query_service=get_schedule_query_service()
 )
 
@@ -22,3 +24,4 @@ schedule_bp.route("/stats", methods=["GET"])(controller.get_schedule_statistics_
 schedule_bp.route("/leave", methods=["PATCH"])(controller.update_leave_schedule)
 schedule_bp.route("/extra-shift/register", methods=["POST"])(controller.register_extra_shift)
 schedule_bp.route("/weekend-shift/register", methods=["POST"])(controller.register_weekend_shift)
+schedule_bp.route("/calendar-appointment", methods=["GET"])(controller.get_calendar_appointment)

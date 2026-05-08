@@ -3,6 +3,8 @@ from datetime import datetime
 
 from flask import request
 from flask_jwt_extended import get_jwt_identity
+
+from app.core.services.appointment_command_service import AppointmentCommandService
 from app.shared.utils.api_response import ApiResponse
 
 class AppointmentController:

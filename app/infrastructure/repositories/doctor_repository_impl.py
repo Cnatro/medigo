@@ -8,7 +8,7 @@ from app.core.repositories.doctor_repository import DoctorRepository
 from app.core.services.filter.doctor_filter import DoctorFilter
 from app.infrastructure.db import db
 from app.infrastructure.models import DoctorModel, ClinicModel, ReviewModel, SpecialtyModel, DoctorSpecialtyModel, \
-    UserModel
+    UserModel, DoctorScheduleModel
 from app.interfaces.mappers.doctor_mapper import DoctorMapper
 from sqlalchemy import case, text, distinct
 
@@ -24,6 +24,8 @@ class DoctorRepositoryImpl(DoctorRepository):
             .join(ClinicModel, ClinicModel.id == DoctorModel.clinic_id) \
             .join(DoctorSpecialtyModel, DoctorSpecialtyModel.doctor_id == DoctorModel.id) \
             .join(SpecialtyModel, SpecialtyModel.id == DoctorSpecialtyModel.specialty_id) \
+            .join(DoctorScheduleModel, DoctorScheduleModel.doctor_specialty_id == DoctorSpecialtyModel.id
+                  ).filter(DoctorScheduleModel.is_active == True) \
             .filter(DoctorModel.id == doctor_id) \
             .all()
 
@@ -40,7 +42,11 @@ class DoctorRepositoryImpl(DoctorRepository):
         ).join(UserModel, UserModel.id == DoctorModel.user_id) \
             .join(ClinicModel, ClinicModel.id == DoctorModel.clinic_id) \
             .join(DoctorSpecialtyModel, DoctorSpecialtyModel.doctor_id == DoctorModel.id) \
-            .join(SpecialtyModel, SpecialtyModel.id == DoctorSpecialtyModel.specialty_id)
+            .join(SpecialtyModel, SpecialtyModel.id == DoctorSpecialtyModel.specialty_id) \
+            .join(DoctorScheduleModel, DoctorScheduleModel.doctor_specialty_id == DoctorSpecialtyModel.id
+                  ).filter(
+            DoctorScheduleModel.is_active == True
+        )
 
         filter_obj = DoctorFilter(base_query, params)
         query = filter_obj.apply()
@@ -67,16 +73,20 @@ class DoctorRepositoryImpl(DoctorRepository):
             .join(ClinicModel, ClinicModel.id == DoctorModel.clinic_id) \
             .join(DoctorSpecialtyModel, DoctorSpecialtyModel.doctor_id == DoctorModel.id) \
             .join(SpecialtyModel, SpecialtyModel.id == DoctorSpecialtyModel.specialty_id) \
+            .join(DoctorScheduleModel, DoctorScheduleModel.doctor_specialty_id == DoctorSpecialtyModel.id
+                  ).filter(DoctorScheduleModel.is_active == True) \
             .join(doctor_cte, doctor_cte.c.id == DoctorModel.id)
 
         ordering_ids = [row[0] for row in db.session.query(doctor_cte.c.id).all()]
 
-        ordering = case(
-            {id: index for index, id in enumerate(ordering_ids)},
-            value=DoctorModel.id
-        )
-
-        final_query = final_query.order_by(ordering)
+        if ordering_ids:
+            ordering = case(
+                {id: index for index, id in enumerate(ordering_ids)},
+                value=DoctorModel.id
+            )
+            final_query = final_query.order_by(ordering)
+        else:
+            final_query = final_query.order_by(DoctorModel.created_at.desc())
 
         results = final_query.all()
 
@@ -124,7 +134,7 @@ class DoctorRepositoryImpl(DoctorRepository):
         return DoctorMapper.mgodel_to_entity(model)
 
     @override
-    def find_doctors_by_specialty_ids(self, specialty_ids, limit=5):
+    def find_doctors_by_specialty_ids(self, specialty_ids, limit=3):
         query = text("""
                     SELECT DISTINCT d.id,
                            u.full_name,
@@ -135,9 +145,11 @@ class DoctorRepositoryImpl(DoctorRepository):
                     JOIN users u ON u.id = d.user_id
                     JOIN clinics c ON c.id = d.clinic_id
                     JOIN doctor_specialties ds ON ds.doctor_id = d.id
+                    JOIN doctor_schedules ds1 ON ds1.doctor_specialty_id = ds.id
                     --JOIN time_slots ts ON ts.doctor_specialty_id = ds.id
 
                     WHERE ds.specialty_id = ANY(:specialty_ids)
+                        AND ds1.is_active = TRUE
                      --AND ts.is_available = TRUE
 
                     ORDER BY d.rating_avg DESC, d.experience_years DESC
@@ -161,11 +173,11 @@ class DoctorRepositoryImpl(DoctorRepository):
         return [DoctorSpecialtyMapper.model_with_clinic_to_dict(m) for m in models]
 
     @override
-    def find_doctor_specialty_by_user_id_and_specialty_id(self,user_id, specialty_id):
-        model = db.session.query(DoctorSpecialtyModel)\
-            .join(DoctorModel,DoctorModel.id == DoctorSpecialtyModel.doctor_id)\
-            .filter(DoctorModel.user_id == user_id, DoctorSpecialtyModel.specialty_id == specialty_id)\
-            .distinct()\
+    def find_doctor_specialty_by_user_id_and_specialty_id(self, user_id, specialty_id):
+        model = db.session.query(DoctorSpecialtyModel) \
+            .join(DoctorModel, DoctorModel.id == DoctorSpecialtyModel.doctor_id) \
+            .filter(DoctorModel.user_id == user_id, DoctorSpecialtyModel.specialty_id == specialty_id) \
+            .distinct() \
             .first()
 
         if not model:
@@ -173,3 +185,23 @@ class DoctorRepositoryImpl(DoctorRepository):
 
         return DoctorSpecialtyMapper.model_to_entity(model)
 
+    @override
+    def create_doctor_specialties(self, doctor, specialties_ids):
+
+        if specialties_ids:
+            experience_years = doctor.experience_years
+            default_fee = experience_years * 2200
+
+            doctor_specialties = [
+                DoctorSpecialtyModel(
+                    doctor_id=doctor.id,
+                    specialty_id=sid,
+                    consultation_fee=default_fee
+                )
+                for sid in specialties_ids
+            ]
+
+            db.session.add_all(doctor_specialties)
+        db.session.commit()
+
+        return DoctorMapper.model_to_entity(doctor)

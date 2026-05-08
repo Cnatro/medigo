@@ -21,3 +21,6 @@ class ScheduleRepository(ABC):
 
     @abstractmethod
     def update_status(self, id, data): pass
+
+    @abstractmethod
+    def find_schedule_by_date_and_specialty(self, specialty_id, work_date, shift_type): pass

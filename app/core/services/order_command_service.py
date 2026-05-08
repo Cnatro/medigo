@@ -11,13 +11,13 @@ class OrderCommandService:
         self.order_repo = order_repo
         self.momo_service = momo_service
 
-    def create_order(self, order: Order):
+    def create_order(self, order: Order, data):
         order = self.order_repo.save(order)
 
         if not order:
             return None, MessageCode.FAIL
 
-        momo_result = self.momo_service.created_payment(order, PaymentType.PAYMENT)
+        momo_result = self.momo_service.created_payment(order, PaymentType.PAYMENT, data)
 
         if not momo_result:
             return None, MessageCode.PAYMENT_FAILED
@@ -29,7 +29,7 @@ class OrderCommandService:
                 "total_amount": order.total_amount
             },
             "payment": momo_result
-        }, MessageCode.SUCCESS
+        }
 
     def momo_call_back(self, data):
         order, message = self.momo_service.handle_momo_callback(self.order_repo, data)
