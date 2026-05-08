@@ -16,6 +16,8 @@ class SymptomRepositoryImpl(SymptomRepository):
                         ss.weight
                     FROM symptom_specialties ss
                     WHERE ss.symptom_id = ANY(:symptom_ids)
+                    ORDER BY ss.weight DESC
+                    LIMIT 3
                 """)
 
         result = db.session.execute(query, {

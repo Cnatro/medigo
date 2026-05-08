@@ -6,6 +6,7 @@ from app.infrastructure.repositories.symptom_repository_impl import SymptomRepos
 from app.infrastructure.repositories.vector_repository_impl import VectorRepositoryImpl
 import json
 
+
 class RagService:
 
     def __init__(self, embed_service: EmbeddingService, vector_repo: VectorRepositoryImpl,
@@ -26,21 +27,23 @@ class RagService:
         symptom_ids = [s["id"] for s in symptoms]
 
         specialties_raw = self.symptom_repo.map_to_specialties(symptom_ids)
-        specialty_ids = [s.specialty_id for s in specialties_raw]
-
-        specialty_names = self.specialty_repo.find_names_by_ids(ids=specialty_ids)
-        doctors = self.doctor_repo.find_doctors_by_specialty_ids(specialty_ids)
-
         ranked_specialties = self.ranking_service.specialty_ranking(specialties=specialties_raw,
                                                                     matched_symptoms=symptoms)
+        top_specialty_ids = [
+            s[0] for s in ranked_specialties[:2]
+        ]
+
+        specialty_names = self.specialty_repo.find_names_by_ids(ids=top_specialty_ids)
+        doctors = self.doctor_repo.find_doctors_by_specialty_ids(top_specialty_ids)
+
+
         ranked_doctor = self.ranking_service.doctor_ranking(doctors=doctors)
 
         # gợi ý lịch
 
         answer = self.embed_service.sumnary_answer(
             user_input=user_input,
-            doctors=ranked_doctor,
-            specialties=ranked_specialties
+            specialty_names=specialty_names
         )
 
         try:
@@ -58,5 +61,5 @@ class RagService:
                 for s in specialty_names
             ],
             "doctors": ranked_doctor,
-             **answer_data
+            **answer_data
         }
