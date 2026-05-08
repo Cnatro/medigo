@@ -31,3 +31,6 @@ class DoctorRepository(ABC):
 
     @abstractmethod
     def create_doctor_specialties(self, doctor, specialties_ids): pass
+
+    @abstractmethod
+    def get_appointments_by_status(self, id, data): pass

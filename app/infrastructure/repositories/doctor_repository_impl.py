@@ -8,11 +8,12 @@ from app.core.repositories.doctor_repository import DoctorRepository
 from app.core.services.filter.doctor_filter import DoctorFilter
 from app.infrastructure.db import db
 from app.infrastructure.models import DoctorModel, ClinicModel, ReviewModel, SpecialtyModel, DoctorSpecialtyModel, \
-    UserModel, DoctorScheduleModel
+    UserModel, DoctorScheduleModel, AppointmentModel, PatientModel
 from app.interfaces.mappers.doctor_mapper import DoctorMapper
 from sqlalchemy import case, text, distinct
 
 from app.interfaces.mappers.doctor_specialty_mapper import DoctorSpecialtyMapper
+from app.shared.utils.appointment_enum import AppointmentStatus
 
 
 class DoctorRepositoryImpl(DoctorRepository):
@@ -205,3 +206,16 @@ class DoctorRepositoryImpl(DoctorRepository):
         db.session.commit()
 
         return DoctorMapper.model_to_entity(doctor)
+
+    @override
+    def get_appointments_by_status(self, id, data):
+        return (
+            db.session.query(AppointmentModel)
+            .filter(
+                AppointmentModel.doctor_id == id,
+                AppointmentModel.status == AppointmentStatus.PENDING.name
+            )
+            .join(PatientModel, AppointmentModel.patient_id == PatientModel.id)
+            .join(UserModel, PatientModel.user_id == UserModel.id)
+            .all()
+        )

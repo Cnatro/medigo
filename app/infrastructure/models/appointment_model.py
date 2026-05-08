@@ -14,6 +14,11 @@ class AppointmentModel(db.Model):
     status = db.Column(db.String)
     reason = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    symptom = db.Column(db.Text)
 
     review = db.relationship("ReviewModel", backref="appointment", uselist=False)
     doctor_specialty = db.relationship("DoctorSpecialtyModel",back_populates="appointments" )
+    patient = db.relationship(
+        "PatientModel",
+        back_populates="appointments"
+    )
