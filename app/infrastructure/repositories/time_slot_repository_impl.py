@@ -9,6 +9,7 @@ from app.infrastructure.db import db
 from app.infrastructure.models import TimeSlotModel, AppointmentModel, DoctorScheduleModel, PatientModel, UserModel, \
     SpecialtyModel, DoctorSpecialtyModel, DoctorModel
 from app.interfaces.mappers.time_slot_mapper import TimeSlotMapper
+from app.shared.utils.schedule_enum import ScheduleStatus
 
 
 class TimeSlotRepositoryImpl(TimeSlotRepository):
@@ -43,7 +44,7 @@ class TimeSlotRepositoryImpl(TimeSlotRepository):
                 TimeSlotModel.date >= start_date,
                 TimeSlotModel.date <= end_date,
                 DoctorScheduleModel.is_active == True,
-                DoctorScheduleModel.status == "ACTIVE"
+                DoctorScheduleModel.status.in_([ScheduleStatus.ACTIVE.name, ScheduleStatus.EXTRA_APPROVED.name, ScheduleStatus.WEEKEND_APPROVED.name])
             )
             .order_by(TimeSlotModel.date, TimeSlotModel.start_time)
             .all()

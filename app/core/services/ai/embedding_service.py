@@ -19,26 +19,18 @@ class EmbeddingService:
         )
         return res.embeddings[0].values
 
-    def sumnary_answer(self, user_input, specialties, doctors, urgency=None):
+    def sumnary_answer(self, user_input, specialty_names):
         SYSTEM_PROMPT = """
-                Bạn là trợ lý biên tập nội dung y tế tại Việt Nam.
-
-                QUY TẮC TUYỆT ĐỐI:
-                - CHỈ dùng tiếng Việt 100%
-                - KHÔNG được dùng tiếng Anh
-                - KHÔNG chẩn đoán bệnh
-                - KHÔNG thay đổi thông tin bác sĩ hoặc chuyên khoa
-                - KHÔNG thêm dữ liệu mới
-                
-                NHIỆM VỤ:
-                - Viết lại nội dung cho tự nhiên, dễ hiểu, mượt mà
-                
-                OUTPUT:
-                - Một đoạn văn tư vấn y tế rõ ràng
-                - Có xuống dòng hợp lý
-                - Không danh sách dài máy móc
-                - CHỈ OUTPUT JSON:
-
+                Bạn là trợ lý hỗ trợ sức khỏe tại Việt Nam.
+        
+                QUY TẮC:
+                - Chỉ dùng tiếng Việt
+                - Không chẩn đoán bệnh
+                - Không kê thuốc
+                - Chỉ đưa lời khuyên cơ bản
+        
+                Trả về JSON:
+        
                 {
                   "summary": "...",
                   "advice": "..."
@@ -46,18 +38,18 @@ class EmbeddingService:
                 """
 
         USER_PROMPT = f"""
-                Thông tin người dùng:
-                {user_input}
-        
-                Chuyên khoa đã được hệ thống chọn:
-                {specialties}
-        
-                Bác sĩ đề xuất:
-                {doctors}
-        
-                Hãy viết lại thành một đoạn tư vấn y tế mượt mà, dễ hiểu cho người dùng.
-                Không thay đổi bất kỳ thông tin nào.
-                """
+        Người dùng mô tả:
+
+        {user_input}
+
+        Chuyên khoa phù hợp:
+        {specialty_names}
+
+        Hãy:
+        - tóm tắt vấn đề người dùng đang gặp
+        - đưa lời khuyên cơ bản
+        - khuyên đặt lịch khám nếu cần
+        """
 
         # Mức độ cảnh báo:
         # {urgency}
