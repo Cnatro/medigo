@@ -191,6 +191,16 @@ class ScheduleCommandService:
             return None, MessageCode.FAIL
 
         work_date = datetime.strptime(data["workDate"], "%Y-%m-%d").date()
+
+        existing_schedule = self.schedule_repo.find_schedule_by_date_and_specialty(
+            specialty_id=data["specialty_id"],
+            work_date=work_date,
+            shift_type=shift_type
+        )
+
+        if existing_schedule:
+            return None, MessageCode.SCHEDULE_ALREADY_EXISTS
+
         schedule = Schedule(
             id=str(uuid.uuid4()),
             doctor_specialty_id=ds.id,
