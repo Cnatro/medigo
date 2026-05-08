@@ -17,3 +17,4 @@ controller = DoctorController(
 
 doctor_bp.route("",methods=["GET"])(controller.get_doctors)
 doctor_bp.route("/<id>", methods=["GET"])(controller.get_doctor_by_id)
+doctor_bp.route("/<id>/appointments", methods=["GET"])(controller.get_appointments_by_status)

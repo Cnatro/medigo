@@ -6,6 +6,8 @@ from flask_jwt_extended import get_jwt_identity
 
 from app.core.services.appointment_command_service import AppointmentCommandService
 from app.shared.utils.api_response import ApiResponse
+from app.shared.utils.message_code import MessageCode
+
 
 class AppointmentController:
 
@@ -51,20 +53,14 @@ class AppointmentController:
         if not result:
             return ApiResponse.error(code)
 
-        datetime_str = None
-        if result["date"] and result["start_time"]:
-            datetime_str = datetime.strftime(
-                datetime.combine(result["date"], result["start_time"]),
-                "%d/%m/%Y %H:%M"
-            )
+        return ApiResponse.success(code, result)
 
-        return ApiResponse.success(code, {
-            "id": result["id"],
-            "doctor_name": result["doctor_name"],
-            "specialty": result["specialty"],
-            "datetime": datetime_str,
-            "type": "Tại bệnh viện",
-            "clinic_name": result["clinic_name"],
-            "reason": result["reason"],
-            "symptoms": result["reason"]
-        })
+    def update_complete(self, appointment_id):
+        data = request.json
+
+        result, code = self.appointment_command_service.update_complete(appointment_id, symptom = data.get("symptom", ""))
+
+        if not result:
+            return ApiResponse.error(messageCode=MessageCode.FAIL, data=None)
+
+        return ApiResponse.success(messageCode=code, data=result)

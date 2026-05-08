@@ -3,7 +3,7 @@ from app.core.entities.base_entity import BaseEntity
 
 class Appointment(BaseEntity):
     def __init__(self, id, patient_id, doctor_id, time_slot_id,doctor_specialty_id,
-                 status, reason, created_at=None):
+                 status, reason, symptom, created_at=None):
         super().__init__(id)
         self.patient_id = patient_id
         self.doctor_id = doctor_id
@@ -12,3 +12,4 @@ class Appointment(BaseEntity):
         self.reason = reason
         self.created_at = created_at
         self.doctor_specialty_id = doctor_specialty_id
+        self.symptom = symptom

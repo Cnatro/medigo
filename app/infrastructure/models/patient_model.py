@@ -13,4 +13,7 @@ class PatientModel(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     user = db.relationship("UserModel", back_populates="patient")
-    appointments = db.relationship("AppointmentModel", backref="patient")
+    appointments = db.relationship(
+        "AppointmentModel",
+        back_populates="patient"
+    )

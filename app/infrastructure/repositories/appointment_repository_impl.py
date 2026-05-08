@@ -7,9 +7,11 @@ from app.infrastructure.db import db
 from app.infrastructure.models import AppointmentModel, PatientModel, DoctorModel, DoctorSpecialtyModel
 from app.infrastructure.models import PatientModel
 from app.interfaces.mappers.appointment_mapper import AppointmentMapper
+from app.shared.utils.appointment_enum import AppointmentStatus
 
 
 class AppointmentRepositoryImpl(AppointmentRepository):
+    @override
     def get_history_by_patient(self, user_id):
         patient = PatientModel.query.filter_by(user_id=user_id).first()
         models = (
@@ -22,7 +24,7 @@ class AppointmentRepositoryImpl(AppointmentRepository):
             .all()
         )
 
-        return [AppointmentMapper.model_to_entities(m) for m in models]
+        return [AppointmentMapper.model_to_entity(m) for m in models]
 
     @override
     def create(self, user_id ,appointment):
@@ -36,8 +38,9 @@ class AppointmentRepositoryImpl(AppointmentRepository):
             db.session.rollback()
             print(f"Database Integrity Error: {e.orig}")
             return None
-        return AppointmentMapper.model_to_entities(model)
+        return AppointmentMapper.model_to_entity(model)
 
+    @override
     def get_detail(self, appointment_id):
         model = (
             AppointmentModel.query
@@ -53,5 +56,19 @@ class AppointmentRepositoryImpl(AppointmentRepository):
 
         if not model:
             return None
+
+        return AppointmentMapper.model_to_detail(model)
+
+    @override
+    def update_status(self, appointment_id, symptom: str, status):
+        model = AppointmentModel.query.filter_by(id=appointment_id).first()
+
+        if not model:
+            return None
+
+        model.status = status
+        model.symptom = symptom
+
+        db.session.commit()
 
         return AppointmentMapper.model_to_detail(model)

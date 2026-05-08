@@ -1,5 +1,6 @@
 from app.core.entities.time_slot import TimeSlot
 from app.infrastructure.models import TimeSlotModel
+from app.shared.utils.appointment_enum import AppointmentStatus
 
 
 class TimeSlotMapper:
@@ -87,7 +88,12 @@ class TimeSlotMapper:
         status = "available"
 
         if appointment:
-            status = "booked"
+            if appointment.status == AppointmentStatus.COMPLETED.name:
+                status = "completed"
+            elif appointment.status in [AppointmentStatus.PENDING.name, AppointmentStatus.CONFIRMED.name]:
+                status = "booked"
+            else:
+                status = "booked"
         elif not slot.is_available:
             status = "closed"
 

@@ -101,7 +101,8 @@ def get_order_command_service():
     time_slot_repo = TimeSlotRepositoryImpl()
     momo_service = MomoService(
         payment_repo=payment_history_repo,
-        time_slot_repo=time_slot_repo
+        time_slot_repo=time_slot_repo,
+        appointment_repo=AppointmentRepositoryImpl()
     )
     return OrderCommandService(
         order_repo=get_order_repo(),

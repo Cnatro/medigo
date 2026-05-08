@@ -60,3 +60,7 @@ class AppointmentCommandService:
         )
 
         return result_data, MessageCode.SUCCESS
+
+    def update_complete(self, appointment_id, symptom):
+        result = self.appointment_repo.update_status(appointment_id, symptom,AppointmentStatus.COMPLETED.name)
+        return result, MessageCode.SUCCESS
