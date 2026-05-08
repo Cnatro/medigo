@@ -25,3 +25,16 @@ class AppointmentMapper:
             status=entity.status,
             reason=entity.reason
         )
+
+    @staticmethod
+    def model_to_detail(model):
+        return {
+            "id": model.id,
+            "doctor_name": model.doctor.user.full_name if model.doctor and model.doctor.user else None,
+            "specialty": model.doctor_specialty.specialty.name if model.doctor_specialty else None,
+            "clinic_name": model.doctor.clinic.name if model.doctor and model.doctor.clinic else None,
+            "date": model.time_slot.date if model.time_slot else None,
+            "start_time": model.time_slot.start_time if model.time_slot else None,
+            "reason": model.reason,
+            "status": model.status
+        }

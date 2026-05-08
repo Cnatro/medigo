@@ -8,6 +8,7 @@ from app.core.services.ai.embedding_service import EmbeddingService
 from app.core.services.ai.rag_service import RagService
 from app.core.services.ai.ranking_service import RankingService
 from app.core.services.appointment_command_service import AppointmentCommandService
+from app.core.services.appointment_query_service import AppointmentQueryService
 from app.core.services.clinic_command_service import ClinicCommandService
 from app.core.services.clinic_query_service import ClinicQueryService
 from app.core.services.doctor_command_service import DoctorCommandService
@@ -97,7 +98,11 @@ def get_order_repo():
 
 def get_order_command_service():
     payment_history_repo = PaymentHistoryRepositoryImpl()
-    momo_service = MomoService(payment_repo=payment_history_repo, time_slot_repo=TimeSlotRepositoryImpl())
+    time_slot_repo = TimeSlotRepositoryImpl()
+    momo_service = MomoService(
+        payment_repo=payment_history_repo,
+        time_slot_repo=time_slot_repo
+    )
     return OrderCommandService(
         order_repo=get_order_repo(),
         momo_service=momo_service
@@ -178,6 +183,11 @@ def get_appointment_command_service():
         order_command_service=get_order_command_service()
     )
 
+
+def get_appointment_query_service():
+    return AppointmentQueryService(
+        appointment_repo= AppointmentRepositoryImpl(),
+    )
 
 def get_time_slot_command_service():
     return TimeSlotCommandService(
