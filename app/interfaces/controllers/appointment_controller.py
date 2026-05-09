@@ -25,11 +25,7 @@ class AppointmentController:
         if not result:
             return ApiResponse.error(code)
 
-        return ApiResponse.success(code, {
-            "id": result.id,
-            "time_slot_id": result.time_slot_id,
-            "status": result.status
-        })
+        return ApiResponse.success(code, data=result)
 
     def get_history(self):
         user_id = get_jwt_identity()
