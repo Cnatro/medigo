@@ -1,6 +1,7 @@
 from app.infrastructure.repositories.admin_repository_impl import AdminRepositoryImpl
 from app.shared.utils.message_code import MessageCode
 from app.shared.utils.role import Role
+from app.shared.utils.schedule_enum import ScheduleType, ScheduleStatus
 
 
 class AdminQueryService:
@@ -32,8 +33,14 @@ class AdminQueryService:
             "recent_appointments": self.admin_repo.get_recent_appointments()
         }, MessageCode.SUCCESS
 
-    def get_users(self):
-        users = self.admin_repo.get_all_users()
+    def get_users(self, page, limit, filters):
+        users_page = self.admin_repo.get_all_users(
+            page=page,
+            limit=limit,
+            filters=filters
+        )
+
+        users = users_page.items
 
         result = [
             {
@@ -43,13 +50,26 @@ class AdminQueryService:
                 "phone": user.phone,
                 "role": user.role,
                 "created_at": user.created_at.isoformat(),
-                "status": "active"
-                if user.created_at else None
+                "status": "active" if user.created_at else None,
+                "doctor_id": user.doctor.id
+                if user.role == Role.DOCTOR.name and user.doctor
+                else None,
+                "patient_id": user.patient.id
+                if user.role == Role.PATIENT.name and user.patient
+                else None,
             }
-            for user in users if user.role != Role.ADMIN.name
+            for user in users
         ]
 
-        return result, MessageCode.SUCCESS
+        return {
+            "items": result,
+            "pagination": {
+                "page": users_page.page,
+                "limit": users_page.per_page,
+                "total": users_page.total,
+                "pages": users_page.pages
+            }
+        }, MessageCode.SUCCESS
 
     def get_clinics(self):
         clinics = self.admin_repo.get_all_clinics()
@@ -69,51 +89,74 @@ class AdminQueryService:
 
         return result, MessageCode.SUCCESS
 
-    def get_schedules(self):
-        schedules = self.admin_repo.get_all_schedules()
+    def get_schedules(self, page, limit, filters):
+        doctor_page = self.admin_repo.get_all_schedules(
+            page=page,
+            limit=limit,
+            filters=filters
+        )
 
-        grouped = {}
+        doctors = doctor_page.items
+        result = []
 
-        for s in schedules:
-            ds = s.doctor_specialty
-            if not ds:
-                continue
-
-            doctor = ds.doctor
-            specialty = ds.specialty
-
-            key = ds.id  # doctor_specialty_id là root group
-
-            if key not in grouped:
-                grouped[key] = {
-                    "doctor_specialty_id": ds.id,
-                    "doctor_name": doctor.user.full_name if doctor else None,
-                    "specialty": specialty.name if specialty else None,
-                    "clinic_id": doctor.clinic_id if doctor else None,
-
-                    # 🔥 tách rõ domain
-                    "regular": [],
-                    "extra_shift": [],
-                    "weekend_shift": []
-                }
-
-            payload = {
-                "id": s.id,
-                "day_of_week": s.day_of_week,
-                "start_time": str(s.start_time),
-                "end_time": str(s.end_time),
-                "status": s.status,
-                "reason": s.reason
+        for doctor in doctors:
+            item = {
+                "doctor_id": doctor.id,
+                "doctor_name": doctor.user.full_name if doctor.user else None,
+                "clinic_id": doctor.clinic_id,
+                "specialties": [],
+                "regular": [],
+                "extra_shift": [],
+                "weekend_shift": []
             }
 
-            if s.type == "REGULAR":
-                grouped[key]["regular"].append(payload)
-            elif s.type == "EXTRA_SHIFT":
-                grouped[key]["extra_shift"].append(payload)
-            elif s.type == "WEEKEND_SHIFT":
-                grouped[key]["weekend_shift"].append(payload)
+            for ds in doctor.doctor_specialties:
+                if ds.specialty:
+                    item["specialties"].append({
+                        "id": ds.specialty.id,
+                        "name": ds.specialty.name
+                    })
 
-        return list(grouped.values()), MessageCode.SUCCESS
+                schedules = ds.schedules or []
+
+                for s in schedules:
+                    payload = {
+                        "id": s.id,
+                        "doctor_specialty_id": ds.id,
+                        "specialty_id": ds.specialty_id,
+                        "day_of_week": s.day_of_week,
+                        "start_time": str(s.start_time),
+                        "end_time": str(s.end_time),
+                        "status": s.status,
+                        "reason": s.reason
+                    }
+
+                    if s.type == ScheduleType.REGULAR.name:
+                        item["regular"].append(payload)
+
+                    elif (
+                            s.type == ScheduleType.EXTRA_SHIFT.name
+                            and s.status == ScheduleStatus.EXTRA_APPROVED.name
+                    ):
+                        item["extra_shift"].append(payload)
+
+                    elif (
+                            s.type == ScheduleType.WEEKEND_SHIFT.name
+                            and s.status == ScheduleStatus.WEEKEND_APPROVED.name
+                    ):
+                        item["weekend_shift"].append(payload)
+
+            result.append(item)
+
+        return {
+            "items": result,
+            "pagination": {
+                "page": doctor_page.page,
+                "limit": doctor_page.per_page,
+                "total": doctor_page.total,
+                "pages": doctor_page.pages
+            }
+        }, MessageCode.SUCCESS
 
     def get_payments(self):
         payments = self.admin_repo.get_all_payment_transactions()
@@ -201,3 +244,11 @@ class AdminQueryService:
             })
 
         return result, MessageCode.SUCCESS
+
+    def get_doctor_detail_to_gen_calender(self, doctor_id):
+        data = self.admin_repo.get_doctor_detail_to_gen_calender(doctor_id=doctor_id)
+
+        if not data:
+            return None, MessageCode.FAIL
+
+        return next(iter(data.values()), None), MessageCode.SUCCESS

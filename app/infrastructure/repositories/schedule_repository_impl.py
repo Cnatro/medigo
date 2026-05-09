@@ -31,7 +31,7 @@ class ScheduleRepositoryImpl(ScheduleRepository):
             DoctorScheduleModel.doctor_specialty
         ).filter(
             DoctorScheduleModel.day_of_week == day_of_week,
-            DoctorScheduleModel.status == "ACTIVE",
+            DoctorScheduleModel.status == ScheduleStatus.ACTIVE.name,
             DoctorScheduleModel.doctor_specialty.has(
                 doctor_id=doctor_id
             )

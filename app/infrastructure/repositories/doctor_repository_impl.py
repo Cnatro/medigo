@@ -132,7 +132,7 @@ class DoctorRepositoryImpl(DoctorRepository):
         db.session.commit()
         db.session.refresh(model)
 
-        return DoctorMapper.mgodel_to_entity(model)
+        return DoctorMapper.model_to_entity(model)
 
     @override
     def find_doctors_by_specialty_ids(self, specialty_ids, limit=3):
@@ -219,3 +219,16 @@ class DoctorRepositoryImpl(DoctorRepository):
             .join(UserModel, PatientModel.user_id == UserModel.id)
             .all()
         )
+
+    @override
+    def find_doctor_specialty(self, doctor_id, specialty_id):
+        model = db.session.query(DoctorSpecialtyModel) \
+            .filter(DoctorSpecialtyModel.doctor_id == doctor_id, DoctorSpecialtyModel.specialty_id == specialty_id) \
+            .distinct() \
+            .first()
+
+        if not model:
+            return None
+
+        return DoctorSpecialtyMapper.model_to_entity(model)
+

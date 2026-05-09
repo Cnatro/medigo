@@ -4,6 +4,7 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 
+from app.dependencies import get_cronjob_schedule
 from app.interfaces.routes.admin_routes import admin_bp
 from app.interfaces.routes.appointment_routes import appointment_bp
 from app.interfaces.routes.auth_routes import auth_bp
@@ -68,5 +69,9 @@ def create_app():
     app.register_blueprint(review_bp, url_prefix="/api/reviews")
     app.register_blueprint(admin_bp, url_prefix="/api/admin")
     app.logger.info("App initialized")
+
+    cron_job_schedule = get_cronjob_schedule()
+    cron_job_schedule.start_scheduler()
+
 
     return app

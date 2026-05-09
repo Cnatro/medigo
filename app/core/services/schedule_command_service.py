@@ -1,5 +1,6 @@
 import os
 import uuid
+import logging
 from collections import defaultdict
 from datetime import date, timedelta, time, datetime
 
@@ -13,6 +14,8 @@ from app.infrastructure.repositories.schedule_repository_impl import ScheduleRep
 from app.interfaces.mappers.schedule_mapper import ScheduleMapper
 from app.shared.utils.message_code import MessageCode
 from app.shared.utils.schedule_enum import ScheduleType, ScheduleStatus
+
+log = logging.getLogger(__name__)
 
 
 class ScheduleCommandService:
@@ -28,6 +31,7 @@ class ScheduleCommandService:
         self.timeslot_command_service = timeslot_command_service
 
     def generate_next_week_schedule(self):
+        log.info("GEN SCHEDULE RUNNING...")
 
         today = date.today()
         next_monday = today + timedelta(days=(7 - today.weekday()))
@@ -149,6 +153,7 @@ class ScheduleCommandService:
 
                 generated_count += 1
 
+        log.info("GEN SCHEDULE DONE")
         return generated_count, MessageCode.SUCCESS
 
     def update_leave_schedule(self, data):
@@ -230,3 +235,88 @@ class ScheduleCommandService:
         )
 
         return result, MessageCode.SUCCESS
+
+    def create_schedule_work(self, data):
+        doctor_id = data["doctor_id"]
+        specialty_id = data["specialty_id"]
+        doctor_name = data["doctor_name"]
+
+        start_date = datetime.strptime(
+            data["start_date"],
+            "%Y-%m-%d"
+        ).date()
+
+        end_date = datetime.strptime(
+            data["end_date"],
+            "%Y-%m-%d"
+        ).date()
+
+        doctor_specialty = (
+            self.doctor_repo.find_doctor_specialty(
+                doctor_id=doctor_id,
+                specialty_id=specialty_id
+            )
+        )
+
+        if not doctor_specialty:
+            return None, MessageCode.FAIL
+
+        current_date = start_date
+        generated_count = 0
+
+        while current_date <= end_date:
+
+            if current_date.weekday() >= 5:
+                current_date += timedelta(days=1)
+                continue
+
+            existing_schedule = self.schedule_repo.schedule_exists(
+                doctor_id,
+                current_date
+            )
+
+            if existing_schedule:
+                current_date += timedelta(days=1)
+                continue
+
+            # tạo schedule
+            schedule = Schedule(
+                id=str(uuid.uuid4()),
+                doctor_specialty_id=doctor_specialty.id,
+                day_of_week=current_date.weekday(),
+                start_time=time(7, 0),
+                end_time=time(17, 0),
+                type_=ScheduleType.REGULAR.name,
+                status=ScheduleStatus.ACTIVE.name
+            )
+
+            result = self.schedule_repo.create_schedule(schedule)
+
+            # generate slots
+            slot_dicts = self.timeslot_command_service.generate_slots(
+                work_date=current_date,
+                start_time=time(7, 0),
+                end_time=time(17, 0),
+                doctor_specialty_id=doctor_specialty.id,
+                schedule_id=result.id
+            )
+
+            slot_models = [
+                TimeSlotModel(**slot)
+                for slot in slot_dicts
+            ]
+
+            self.timeslot_command_service.create_time_slots(
+                slot_models
+            )
+
+            generated_count += 1
+            current_date += timedelta(days=1)
+
+        return {
+            "generated_count": generated_count,
+            "doctor_id": doctor_id,
+            "doctor_name": doctor_name,
+            "start_date": str(start_date),
+            "end_date": str(end_date)
+        }, MessageCode.CREATED

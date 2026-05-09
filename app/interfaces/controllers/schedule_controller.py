@@ -65,3 +65,11 @@ class ScheduleController:
         results, code = self.schedule_query_service.get_calendar_appointment(start_date, end_date, specialty_id)
 
         return ApiResponse.success(messageCode=code, data=results)
+
+    def create_schedule_work(self):
+        data = request.json
+
+        result, code = self.schedule_command_service.create_schedule_work(data=data)
+
+        return ApiResponse.created(messageCode=code, data=result)
+

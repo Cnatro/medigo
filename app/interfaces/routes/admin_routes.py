@@ -46,3 +46,5 @@ admin_bp.route("/schedule-requests", methods=["GET"])(controller.get_schedule_re
 admin_bp.route( "/schedule-requests/<schedule_id>/approve", methods=["PATCH"] )(controller.approve_schedule_request)
 
 admin_bp.route( "/schedule-requests/<schedule_id>/reject", methods=["PATCH"] )(controller.reject_schedule_request)
+
+admin_bp.route( "/doctors/<doctor_id>", methods=["GET"] )(controller.get_doctor_detail_to_gen_calender)
