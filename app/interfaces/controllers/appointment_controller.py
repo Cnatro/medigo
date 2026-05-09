@@ -32,16 +32,18 @@ class AppointmentController:
 
         result, code = self.appointment_query_service.get_history(user_id)
 
-        return ApiResponse.success(code, [
-            {
-                "id": item.id,
-                "doctor_id": item.doctor_id,
-                "time_slot_id": item.time_slot_id,
-                "status": item.status,
-                "reason": item.reason
-            }
-            for item in result
-        ])
+        return ApiResponse.success(code, result)
+
+        # return ApiResponse.success(code, [
+        #     {
+        #         "id": item.id,
+        #         "doctor_id": item.doctor_id,
+        #         "time_slot_id": item.time_slot_id,
+        #         "status": item.status,
+        #         "reason": item.reason
+        #     }
+        #     for item in result
+        # ])
 
     def get_detail(self, appointment_id):
         result, code = self.appointment_query_service.get_detail(appointment_id)
