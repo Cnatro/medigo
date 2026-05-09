@@ -11,6 +11,7 @@ from app.core.services.appointment_command_service import AppointmentCommandServ
 from app.core.services.appointment_query_service import AppointmentQueryService
 from app.core.services.clinic_command_service import ClinicCommandService
 from app.core.services.clinic_query_service import ClinicQueryService
+from app.core.services.cron_job.gen_scheduler import CronJobSchedule
 from app.core.services.doctor_command_service import DoctorCommandService
 from app.core.services.doctor_query_service import DoctorQueryService
 from app.core.services.handle_role.query_registry import ROLE_QUERY_HANDLERS
@@ -236,4 +237,9 @@ def get_admin_command_service():
     return AdminCommandService(
         schedule_repo= ScheduleRepositoryImpl(),
         admin_repo=get_admin_repo()
+    )
+
+def get_cronjob_schedule():
+    return CronJobSchedule(
+        schedule_command_service= get_schedule_command_service()
     )
