@@ -54,29 +54,36 @@ class AdminRepositoryImpl(AdminRepository):
 
     @override
     def get_weekly_appointments(self):
-        today = datetime.today()
-        start_week = today - timedelta(days=today.weekday())
-        end_week = start_week + timedelta(days=6)
+        today = datetime.today().date()
 
-        results = (
+        last_7_days = [
+            today - timedelta(days=i)
+            for i in range(6, -1, -1)
+        ]
+
+        db_result = (
             db.session.query(
                 func.date(AppointmentModel.created_at).label("date"),
                 func.count(AppointmentModel.id).label("appointments")
             )
             .filter(
-                AppointmentModel.created_at >= start_week,
-                AppointmentModel.created_at <= end_week
+                AppointmentModel.created_at >= last_7_days[0]
             )
             .group_by(func.date(AppointmentModel.created_at))
             .all()
         )
 
+        appointment_map = {
+            item.date: item.appointments
+            for item in db_result
+        }
+
         return [
             {
-                "day": str(item.date),
-                "appointments": item.appointments
+                "day": day.strftime("%d/%m"),
+                "appointments": appointment_map.get(day, 0)
             }
-            for item in results
+            for day in last_7_days
         ]
 
     @override
@@ -85,19 +92,10 @@ class AdminRepositoryImpl(AdminRepository):
             db.session.query(
                 DoctorModel.id,
                 UserModel.full_name,
-                SpecialtyModel.name.label("specialty"),
                 DoctorModel.rating_avg,
                 func.count(AppointmentModel.id).label("patients")
             )
             .join(UserModel, UserModel.id == DoctorModel.user_id)
-            .join(
-                DoctorSpecialtyModel,
-                DoctorSpecialtyModel.doctor_id == DoctorModel.id
-            )
-            .join(
-                SpecialtyModel,
-                SpecialtyModel.id == DoctorSpecialtyModel.specialty_id
-            )
             .outerjoin(
                 AppointmentModel,
                 AppointmentModel.doctor_id == DoctorModel.id
@@ -105,11 +103,11 @@ class AdminRepositoryImpl(AdminRepository):
             .group_by(
                 DoctorModel.id,
                 UserModel.full_name,
-                SpecialtyModel.name
+                DoctorModel.rating_avg
             )
             .order_by(
-                desc(DoctorModel.rating_avg),
-                desc(func.count(AppointmentModel.id))
+                desc(func.count(AppointmentModel.id)),
+                desc(DoctorModel.rating_avg)
             )
             .limit(5)
             .all()
@@ -119,7 +117,6 @@ class AdminRepositoryImpl(AdminRepository):
             {
                 "doctor_id": item.id,
                 "doctor_name": item.full_name,
-                "specialty": item.specialty,
                 "rating": item.rating_avg,
                 "patients": item.patients
             }
@@ -320,3 +317,57 @@ class AdminRepositoryImpl(AdminRepository):
             return None
 
         return DoctorMapper.map_doctors(result)
+
+    @override
+    def get_revenue_chart(self):
+        today = datetime.today().date()
+
+        last_7_days = [
+            today - timedelta(days=i)
+            for i in range(6, -1, -1)
+        ]
+
+        results = (
+            db.session.query(
+                func.date(PaymentTransactionModel.created_at).label("date"),
+                func.sum(PaymentTransactionModel.amount).label("revenue")
+            )
+            .filter(
+                PaymentTransactionModel.status == "SUCCESS",
+                PaymentTransactionModel.type == "PAYMENT",
+                PaymentTransactionModel.created_at >= last_7_days[0]
+            )
+            .group_by(
+                func.date(PaymentTransactionModel.created_at)
+            )
+            .all()
+        )
+
+        revenue_map = {
+            item.date: float(item.revenue or 0)
+            for item in results
+        }
+
+        return [
+            {
+                "day": day.strftime("%d/%m"),
+                "revenue": revenue_map.get(day, 0)
+            }
+            for day in last_7_days
+        ]
+
+    @override
+    def get_appointment_status_summary(self):
+        results = (
+            db.session.query(
+                AppointmentModel.status,
+                func.count(AppointmentModel.id)
+            )
+            .group_by(AppointmentModel.status)
+            .all()
+        )
+
+        return {
+            item[0]: item[1]
+            for item in results
+        }
