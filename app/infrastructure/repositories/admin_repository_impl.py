@@ -16,6 +16,8 @@ from app.infrastructure.models import (
     SpecialtyModel,
     TimeSlotModel, ClinicModel, DoctorScheduleModel, OrderModel, PaymentTransactionModel
 )
+from app.interfaces.mappers.doctor_mapper import DoctorMapper
+from app.shared.utils.role import Role
 from app.shared.utils.schedule_enum import ScheduleStatus
 
 
@@ -190,16 +192,71 @@ class AdminRepositoryImpl(AdminRepository):
         ]
 
     @override
-    def get_all_users(self):
-        return UserModel.query.all()
+    def get_all_users(self, page, limit, filters):
+        query = UserModel.query.filter(
+            UserModel.role != Role.ADMIN.name
+        )
+
+        if filters.get("search"):
+            search = filters["search"]
+
+            query = query.filter(
+                db.or_(
+                    UserModel.full_name.ilike(f"%{search}%"),
+                    UserModel.email.ilike(f"%{search}%")
+                )
+            )
+
+        if filters.get("role"):
+            query = query.filter(
+                UserModel.role == filters["role"]
+            )
+
+        return query.order_by(
+            UserModel.created_at.desc()
+        ).paginate(
+            page=page,
+            per_page=limit,
+            error_out=False
+        )
 
     @override
     def get_all_clinics(self):
         return ClinicModel.query.all()
 
     @override
-    def get_all_schedules(self):
-        return DoctorScheduleModel.query.all()
+    def get_all_schedules(self, page, limit, filters):
+        query = DoctorModel.query \
+            .join(
+            UserModel,
+            DoctorModel.user_id == UserModel.id
+        )
+
+        if filters.get("doctor_name"):
+            query = query.filter(
+                UserModel.full_name.ilike(
+                    f"%{filters['doctor_name']}%"
+                )
+            )
+
+        if filters.get("clinic_id"):
+            query = query.filter(
+                DoctorModel.clinic_id == filters["clinic_id"]
+            )
+
+        if filters.get("specialty_id"):
+            query = query.join(
+                DoctorSpecialtyModel,
+                DoctorSpecialtyModel.doctor_id == DoctorModel.id
+            ).filter(
+                DoctorSpecialtyModel.specialty_id == filters["specialty_id"]
+            )
+
+        return query.paginate(
+            page=page,
+            per_page=limit,
+            error_out=False
+        )
 
     @override
     def get_all_orders(self):
@@ -241,8 +298,25 @@ class AdminRepositoryImpl(AdminRepository):
         return (
             DoctorScheduleModel.query
             .filter(
-                DoctorScheduleModel.status.in_([ScheduleStatus.LEAVE_PENDING.name,ScheduleStatus.EXTRA_PENDING.name,ScheduleStatus.WEEKEND_PENDING.name])
+                DoctorScheduleModel.status.in_([ScheduleStatus.LEAVE_PENDING.name, ScheduleStatus.EXTRA_PENDING.name,
+                                                ScheduleStatus.WEEKEND_PENDING.name])
             )
             .order_by(desc(DoctorScheduleModel.id))
             .all()
         )
+
+    @override
+    def get_doctor_detail_to_gen_calender(self, doctor_id):
+        result = db.session.query(
+            DoctorModel, UserModel, ClinicModel, SpecialtyModel, DoctorSpecialtyModel
+        ).join(UserModel, UserModel.id == DoctorModel.user_id) \
+            .join(ClinicModel, ClinicModel.id == DoctorModel.clinic_id) \
+            .join(DoctorSpecialtyModel, DoctorSpecialtyModel.doctor_id == DoctorModel.id) \
+            .join(SpecialtyModel, SpecialtyModel.id == DoctorSpecialtyModel.specialty_id) \
+            .filter(DoctorModel.id == doctor_id) \
+            .all()
+
+        if not result:
+            return None
+
+        return DoctorMapper.map_doctors(result)

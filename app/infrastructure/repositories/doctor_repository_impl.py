@@ -8,11 +8,12 @@ from app.core.repositories.doctor_repository import DoctorRepository
 from app.core.services.filter.doctor_filter import DoctorFilter
 from app.infrastructure.db import db
 from app.infrastructure.models import DoctorModel, ClinicModel, ReviewModel, SpecialtyModel, DoctorSpecialtyModel, \
-    UserModel, DoctorScheduleModel
+    UserModel, DoctorScheduleModel, AppointmentModel, PatientModel
 from app.interfaces.mappers.doctor_mapper import DoctorMapper
 from sqlalchemy import case, text, distinct
 
 from app.interfaces.mappers.doctor_specialty_mapper import DoctorSpecialtyMapper
+from app.shared.utils.appointment_enum import AppointmentStatus
 
 
 class DoctorRepositoryImpl(DoctorRepository):
@@ -131,7 +132,7 @@ class DoctorRepositoryImpl(DoctorRepository):
         db.session.commit()
         db.session.refresh(model)
 
-        return DoctorMapper.mgodel_to_entity(model)
+        return DoctorMapper.model_to_entity(model)
 
     @override
     def find_doctors_by_specialty_ids(self, specialty_ids, limit=3):
@@ -205,3 +206,29 @@ class DoctorRepositoryImpl(DoctorRepository):
         db.session.commit()
 
         return DoctorMapper.model_to_entity(doctor)
+
+    @override
+    def get_appointments_by_status(self, id, data):
+        return (
+            db.session.query(AppointmentModel)
+            .filter(
+                AppointmentModel.doctor_id == id,
+                AppointmentModel.status == AppointmentStatus.CONFIRMED.name
+            )
+            .join(PatientModel, AppointmentModel.patient_id == PatientModel.id)
+            .join(UserModel, PatientModel.user_id == UserModel.id)
+            .all()
+        )
+
+    @override
+    def find_doctor_specialty(self, doctor_id, specialty_id):
+        model = db.session.query(DoctorSpecialtyModel) \
+            .filter(DoctorSpecialtyModel.doctor_id == doctor_id, DoctorSpecialtyModel.specialty_id == specialty_id) \
+            .distinct() \
+            .first()
+
+        if not model:
+            return None
+
+        return DoctorSpecialtyMapper.model_to_entity(model)
+

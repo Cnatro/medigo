@@ -10,10 +10,12 @@ import logging
 from app.config import Config
 from app.core.entities.order import Order
 from app.core.entities.payment_transaction import PaymentTransaction
+from app.infrastructure.repositories.appointment_repository_impl import AppointmentRepositoryImpl
 from app.infrastructure.repositories.order_repository_impl import OrderRepositoryImpl
 from app.infrastructure.repositories.payment_history_repository_impl import PaymentHistoryRepositoryImpl
 from app.infrastructure.repositories.time_slot_repository_impl import TimeSlotRepositoryImpl
 from app.shared.helper.momo_helper import get_result_meta
+from app.shared.utils.appointment_enum import AppointmentStatus
 from app.shared.utils.message_code import MessageCode
 from app.shared.utils.momo_utils import sign_momo, verify_momo_signature
 from app.shared.utils.payment_enum import OrderStatus, PaymentType, PaymentProvider, PaymentStatus
@@ -23,9 +25,10 @@ log = logging.getLogger(__name__)
 
 class MomoService:
 
-    def __init__(self, payment_repo: PaymentHistoryRepositoryImpl, time_slot_repo: TimeSlotRepositoryImpl):
+    def __init__(self, payment_repo: PaymentHistoryRepositoryImpl, time_slot_repo: TimeSlotRepositoryImpl, appointment_repo: AppointmentRepositoryImpl):
         self.payment_repo = payment_repo
         self.time_slot_repo = time_slot_repo
+        self.appointment_repo = appointment_repo
 
     def append_log(self, transaction, status, message, data):
         log_item = {
@@ -99,6 +102,7 @@ class MomoService:
         self.append_log(transaction, "PENDING", "Init payment", payload)
 
         self.payment_repo.save(transaction)
+        self.time_slot_repo.mark_unavailable(data["time_slot_id"])
 
         res = requests.post(Config.MOMO_ENDPOINT, json=payload)
 
@@ -180,7 +184,9 @@ class MomoService:
             )
 
             self.payment_repo.update(transaction)
-            self.time_slot_repo.mark_unavailable(extra_data.get("time_slot_id"))
+            # self.time_slot_repo.mark_unavailable(extra_data.get("time_slot_id"))
+            self.appointment_repo.update_status(appointment_id=order.appointment_id,symptom='', status=AppointmentStatus.CONFIRMED.name)
+
             return order, MessageCode.PAYMENT_SUCCESS
 
         elif meta["type"] == "PENDING":
@@ -197,8 +203,7 @@ class MomoService:
             self.payment_repo.update(transaction)
             return None, MessageCode.PAYMENT_FAILED
 
-    def refund_money(self, order_repo, payment_history: PaymentTransaction = None):
-        payment_history = self.payment_repo.find_by_transaction_code("PAY_1776582587_852522e6-b603-46dd-bc83-30ebfeb7ba85")
+    def refund_money(self, order_repo, payment_history: PaymentTransaction):
         if not payment_history.provider_transaction_id:
             return None, MessageCode.INVALID_DATA
 

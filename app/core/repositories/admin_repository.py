@@ -20,7 +20,7 @@ class AdminRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all_users(self):
+    def get_all_users(self, page, limit, filters):
         pass
 
     @abstractmethod
@@ -28,7 +28,7 @@ class AdminRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all_schedules(self):
+    def get_all_schedules(self, page, limit, filters):
         pass
 
     @abstractmethod
@@ -41,4 +41,8 @@ class AdminRepository(ABC):
 
     @abstractmethod
     def get_schedule_pending_requests(self):
+        pass
+
+    @abstractmethod
+    def get_doctor_detail_to_gen_calender(self, doctor_id):
         pass

@@ -41,6 +41,7 @@ class OrderController:
 
 
     def cancel_order(self):
-        result , code = self.order_command_service.refund_money_order()
+        data = request.json
+        result , code = self.order_command_service.refund_money_order(data=data)
 
         return ApiResponse.success(code, result)

@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from typing import override
 
 from sqlalchemy.exc import SQLAlchemyError
@@ -5,7 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.core.entities.payment_transaction import PaymentTransaction
 from app.core.repositories.payment_history_repository import PaymentHistoryRepository
 from app.infrastructure.db import db
-from app.infrastructure.models import PaymentTransactionModel
+from app.infrastructure.models import PaymentTransactionModel, OrderModel
 from app.interfaces.mappers.payment_transaction_mapper import PaymentTransactionMapper
 from app.shared.utils.payment_enum import PaymentStatus, PaymentType
 
@@ -13,7 +14,7 @@ from app.shared.utils.payment_enum import PaymentStatus, PaymentType
 class PaymentHistoryRepositoryImpl(PaymentHistoryRepository):
 
     @override
-    def save(self, payment : PaymentTransaction):
+    def save(self, payment: PaymentTransaction):
         model = PaymentTransactionMapper.entity_to_model(payment)
 
         db.session.add(model)
@@ -23,29 +24,28 @@ class PaymentHistoryRepositoryImpl(PaymentHistoryRepository):
         return PaymentTransactionMapper.model_to_entity(model)
 
     @override
-    def update_status_transaction(self, id, status : PaymentStatus):
+    def update_status_transaction(self, id, status: PaymentStatus):
         model = PaymentTransactionModel.query.filter_by(id=id).first()
 
-        if not model :
+        if not model:
             raise ValueError("Not found payment history")
 
-        if model.status == status.name :
+        if model.status == status.name:
             return PaymentTransactionMapper.model_to_entity(model)
 
-        try :
+        try:
             model.status = status.name
             db.session.commit()
 
             return PaymentTransactionMapper.model_to_entity(model)
-        except SQLAlchemyError :
+        except SQLAlchemyError:
             db.session.rollback()
 
-
     @override
-    def find_by_transaction_code(self, transaction_code ):
+    def find_by_transaction_code(self, transaction_code):
         model = PaymentTransactionModel.query.filter_by(transaction_code=transaction_code).first()
 
-        if not model :
+        if not model:
             return None
 
         return PaymentTransactionMapper.model_to_entity(model)
@@ -94,5 +94,24 @@ class PaymentHistoryRepositoryImpl(PaymentHistoryRepository):
 
         if not model:
             return None
+
+        return PaymentTransactionMapper.model_to_entity(model)
+
+    @override
+    def find_by_appointment_id(self, appointment_id):
+        model = (
+            db.session.query(PaymentTransactionModel)
+            .join(
+                OrderModel,
+                OrderModel.id == PaymentTransactionModel.order_id
+            )
+            .filter(
+                OrderModel.appointment_id == appointment_id,
+                PaymentTransactionModel.type == PaymentType.PAYMENT.name,
+                PaymentTransactionModel.status == PaymentStatus.SUCCESS.name
+            )
+            .order_by(PaymentTransactionModel.created_at.desc())
+            .first()
+        )
 
         return PaymentTransactionMapper.model_to_entity(model)

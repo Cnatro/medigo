@@ -31,3 +31,6 @@ class TimeSlotRepository(ABC):
 
     @abstractmethod
     def mark_available(self, slot_id): pass
+
+    @abstractmethod
+    def get_slots_by_doctor_ids(self, doctor_ids: list, limit: int = 3): pass

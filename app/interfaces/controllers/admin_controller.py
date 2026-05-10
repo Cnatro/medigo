@@ -1,3 +1,5 @@
+from flask import request
+
 from app.core.services.admin_command_service import AdminCommandService
 from app.core.services.admin_query_service import AdminQueryService
 from app.shared.utils.api_response import ApiResponse
@@ -30,7 +32,19 @@ class AdminController:
         return ApiResponse.success(code, result)
 
     def get_users(self):
-        result, code = self.admin_query_service.get_users()
+        page = request.args.get("page", 1, type=int)
+        limit = request.args.get("limit", 10, type=int)
+
+        filters = {
+            "search": request.args.get("filter[search]", ""),
+            "role": request.args.get("filter[role]", "")
+        }
+
+        result, code = self.admin_query_service.get_users(
+            page=page,
+            limit=limit,
+            filters=filters
+        )
         return ApiResponse.success(code, result)
 
     def get_clinics(self):
@@ -38,7 +52,17 @@ class AdminController:
         return ApiResponse.success(code, result)
 
     def get_schedules(self):
-        result, code = self.admin_query_service.get_schedules()
+        page = request.args.get("page", 1, type=int)
+        limit = request.args.get("limit", 10, type=int)
+
+        filters = {
+            "doctor_name": request.args.get("filter[doctor_name]", ""),
+            "clinic_id": request.args.get("filter[clinic_id]", ""),
+            "specialty_id": request.args.get("filter[specialty_id]", "")
+        }
+        result, code = self.admin_query_service.get_schedules(page=page,
+                                                              limit=limit,
+                                                              filters=filters)
         return ApiResponse.success(code, result)
 
     def get_payments(self):
@@ -68,3 +92,11 @@ class AdminController:
             schedule_id
         )
         return ApiResponse.success(code, result)
+
+    def get_doctor_detail_to_gen_calender(self, doctor_id):
+        data, code = self.admin_query_service.get_doctor_detail_to_gen_calender(doctor_id=doctor_id)
+
+        if not data:
+            return ApiResponse.not_found(code, data)
+
+        return ApiResponse.success(code, data)

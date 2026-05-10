@@ -16,6 +16,6 @@ controller = ReviewController(
 )
 
 
-review_bp.route("/",methods=["POST"])(controller.review_doctor)
+review_bp.route("",methods=["POST"])(controller.review_doctor)
 review_bp.route("/doctors/<doctor_id>/reviews", methods=["GET"])(controller.get_doctor_reviews)
 review_bp.route("/doctors/<doctor_id>/rating", methods=["GET"])(controller.get_doctor_rating)

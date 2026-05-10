@@ -8,8 +8,10 @@ from app.core.services.ai.embedding_service import EmbeddingService
 from app.core.services.ai.rag_service import RagService
 from app.core.services.ai.ranking_service import RankingService
 from app.core.services.appointment_command_service import AppointmentCommandService
+from app.core.services.appointment_query_service import AppointmentQueryService
 from app.core.services.clinic_command_service import ClinicCommandService
 from app.core.services.clinic_query_service import ClinicQueryService
+from app.core.services.cron_job.gen_scheduler import CronJobSchedule
 from app.core.services.doctor_command_service import DoctorCommandService
 from app.core.services.doctor_query_service import DoctorQueryService
 from app.core.services.handle_role.query_registry import ROLE_QUERY_HANDLERS
@@ -97,10 +99,17 @@ def get_order_repo():
 
 def get_order_command_service():
     payment_history_repo = PaymentHistoryRepositoryImpl()
-    momo_service = MomoService(payment_repo=payment_history_repo, time_slot_repo=TimeSlotRepositoryImpl())
+    time_slot_repo = TimeSlotRepositoryImpl()
+    momo_service = MomoService(
+        payment_repo=payment_history_repo,
+        time_slot_repo=time_slot_repo,
+        appointment_repo=AppointmentRepositoryImpl()
+    )
     return OrderCommandService(
         order_repo=get_order_repo(),
-        momo_service=momo_service
+        momo_service=momo_service,
+        appointment_repo=AppointmentRepositoryImpl(),
+        payment_repo=PaymentHistoryRepositoryImpl()
     )
 
 
@@ -167,7 +176,8 @@ def get_rag_service():
         doctor_repo=DoctorRepositoryImpl(),
         symptom_repo=SymptomRepositoryImpl(),
         specialty_repo=SpecialtyRepositoryImpl(),
-        ranking_service=RankingService()
+        ranking_service=RankingService(),
+        time_slot_repo=TimeSlotRepositoryImpl()
     )
 
 
@@ -178,6 +188,11 @@ def get_appointment_command_service():
         order_command_service=get_order_command_service()
     )
 
+
+def get_appointment_query_service():
+    return AppointmentQueryService(
+        appointment_repo= AppointmentRepositoryImpl(),
+    )
 
 def get_time_slot_command_service():
     return TimeSlotCommandService(
@@ -225,4 +240,9 @@ def get_admin_command_service():
     return AdminCommandService(
         schedule_repo= ScheduleRepositoryImpl(),
         admin_repo=get_admin_repo()
+    )
+
+def get_cronjob_schedule():
+    return CronJobSchedule(
+        schedule_command_service= get_schedule_command_service()
     )
