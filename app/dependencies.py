@@ -174,7 +174,8 @@ def get_rag_service():
         doctor_repo=DoctorRepositoryImpl(),
         symptom_repo=SymptomRepositoryImpl(),
         specialty_repo=SpecialtyRepositoryImpl(),
-        ranking_service=RankingService()
+        ranking_service=RankingService(),
+        time_slot_repo=TimeSlotRepositoryImpl()
     )
 
 

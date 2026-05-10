@@ -244,6 +244,14 @@ class AdminRepositoryImpl(AdminRepository):
                 DoctorModel.clinic_id == filters["clinic_id"]
             )
 
+        if filters.get("specialty_id"):
+            query = query.join(
+                DoctorSpecialtyModel,
+                DoctorSpecialtyModel.doctor_id == DoctorModel.id
+            ).filter(
+                DoctorSpecialtyModel.specialty_id == filters["specialty_id"]
+            )
+
         return query.paginate(
             page=page,
             per_page=limit,

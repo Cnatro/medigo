@@ -57,7 +57,8 @@ class AdminController:
 
         filters = {
             "doctor_name": request.args.get("filter[doctor_name]", ""),
-            "clinic_id": request.args.get("filter[clinic_id]", "")
+            "clinic_id": request.args.get("filter[clinic_id]", ""),
+            "specialty_id": request.args.get("filter[specialty_id]", "")
         }
         result, code = self.admin_query_service.get_schedules(page=page,
                                                               limit=limit,

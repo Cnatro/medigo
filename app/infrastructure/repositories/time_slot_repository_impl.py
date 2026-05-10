@@ -1,5 +1,6 @@
+from datetime import datetime
 from typing import List
-from sqlalchemy import text
+from sqlalchemy import text, asc
 from sqlalchemy.orm import joinedload
 from typing_extensions import override
 
@@ -44,7 +45,8 @@ class TimeSlotRepositoryImpl(TimeSlotRepository):
                 TimeSlotModel.date >= start_date,
                 TimeSlotModel.date <= end_date,
                 DoctorScheduleModel.is_active == True,
-                DoctorScheduleModel.status.in_([ScheduleStatus.ACTIVE.name, ScheduleStatus.EXTRA_APPROVED.name, ScheduleStatus.WEEKEND_APPROVED.name])
+                DoctorScheduleModel.status.in_([ScheduleStatus.ACTIVE.name, ScheduleStatus.EXTRA_APPROVED.name,
+                                                ScheduleStatus.WEEKEND_APPROVED.name])
             )
             .order_by(TimeSlotModel.date, TimeSlotModel.start_time)
             .all()
@@ -111,7 +113,9 @@ class TimeSlotRepositoryImpl(TimeSlotRepository):
                      AND ds.status IN (
                          'ACTIVE',
                          'WEEKEND_APPROVED',
-                         'EXTRA_APPROVED'
+                         'EXTRA_APPROVED',
+                         'LEAVE_PENDING',
+                         'LEAVE_REJECTED'
                      )
                ) t
                GROUP BY time_range
@@ -173,9 +177,11 @@ class TimeSlotRepositoryImpl(TimeSlotRepository):
                 TimeSlotModel.date <= end_date,
                 DoctorScheduleModel.is_active == True,
                 DoctorScheduleModel.status.in_([
-                    "ACTIVE",
-                    "EXTRA_APPROVED",
-                    "WEEKEND_APPROVED"
+                    ScheduleStatus.ACTIVE.name,
+                    ScheduleStatus.EXTRA_APPROVED.name,
+                    ScheduleStatus.WEEKEND_APPROVED.name,
+                    ScheduleStatus.LEAVE_PENDING.name,
+                    ScheduleStatus.LEAVE_REJECTED.name,
                 ])
             )
         )
@@ -204,3 +210,34 @@ class TimeSlotRepositoryImpl(TimeSlotRepository):
         model.is_available = True
         db.session.commit()
         return True
+
+    @override
+    def get_slots_by_doctor_ids(self, doctor_ids: list, limit: int = 3):
+        now = datetime.now()
+        today = now.date()
+
+        slots = (
+            db.session.query(TimeSlotModel)
+            .join(TimeSlotModel.doctor_specialty)
+            .filter(
+                TimeSlotModel.is_available == True,
+                TimeSlotModel.date >= today,
+                DoctorSpecialtyModel.doctor_id.in_(doctor_ids)
+            )
+            .order_by(
+                asc(TimeSlotModel.date),
+                asc(TimeSlotModel.start_time)
+            )
+            .all()
+        )
+
+        # group theo doctor
+        result = {}
+        for slot in slots:
+            doc_id = slot.doctor_specialty.doctor_id
+            if doc_id not in result:
+                result[doc_id] = []
+            if len(result[doc_id]) < limit:
+                result[doc_id].append(slot)
+
+        return result

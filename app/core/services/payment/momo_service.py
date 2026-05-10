@@ -102,6 +102,7 @@ class MomoService:
         self.append_log(transaction, "PENDING", "Init payment", payload)
 
         self.payment_repo.save(transaction)
+        self.time_slot_repo.mark_unavailable(data["time_slot_id"])
 
         res = requests.post(Config.MOMO_ENDPOINT, json=payload)
 
@@ -183,7 +184,7 @@ class MomoService:
             )
 
             self.payment_repo.update(transaction)
-            self.time_slot_repo.mark_unavailable(extra_data.get("time_slot_id"))
+            # self.time_slot_repo.mark_unavailable(extra_data.get("time_slot_id"))
             self.appointment_repo.update_status(appointment_id=order.appointment_id,symptom='', status=AppointmentStatus.CONFIRMED.name)
 
             return order, MessageCode.PAYMENT_SUCCESS
