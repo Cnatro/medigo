@@ -203,8 +203,7 @@ class MomoService:
             self.payment_repo.update(transaction)
             return None, MessageCode.PAYMENT_FAILED
 
-    def refund_money(self, order_repo, payment_history: PaymentTransaction = None):
-        payment_history = self.payment_repo.find_by_transaction_code("PAY_1776582587_852522e6-b603-46dd-bc83-30ebfeb7ba85")
+    def refund_money(self, order_repo, payment_history: PaymentTransaction):
         if not payment_history.provider_transaction_id:
             return None, MessageCode.INVALID_DATA
 

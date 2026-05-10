@@ -213,7 +213,7 @@ class DoctorRepositoryImpl(DoctorRepository):
             db.session.query(AppointmentModel)
             .filter(
                 AppointmentModel.doctor_id == id,
-                AppointmentModel.status == AppointmentStatus.PENDING.name
+                AppointmentModel.status == AppointmentStatus.CONFIRMED.name
             )
             .join(PatientModel, AppointmentModel.patient_id == PatientModel.id)
             .join(UserModel, PatientModel.user_id == UserModel.id)

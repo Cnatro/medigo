@@ -107,7 +107,9 @@ def get_order_command_service():
     )
     return OrderCommandService(
         order_repo=get_order_repo(),
-        momo_service=momo_service
+        momo_service=momo_service,
+        appointment_repo=AppointmentRepositoryImpl(),
+        payment_repo=PaymentHistoryRepositoryImpl()
     )
 
 
