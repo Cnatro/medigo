@@ -29,6 +29,8 @@ class AdminQueryService:
         return {
             "stats": self.admin_repo.get_dashboard_stats(),
             "weekly_appointments": self.admin_repo.get_weekly_appointments(),
+            "revenue_chart": self.admin_repo.get_revenue_chart(),
+            "appointment_status_summary": self.admin_repo.get_appointment_status_summary(),
             "top_doctors": self.admin_repo.get_top_doctors(),
             "recent_appointments": self.admin_repo.get_recent_appointments()
         }, MessageCode.SUCCESS
