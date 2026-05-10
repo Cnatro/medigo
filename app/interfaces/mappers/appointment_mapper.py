@@ -12,7 +12,8 @@ class AppointmentMapper:
             patient_id=model.patient_id,
             time_slot_id=model.time_slot_id,
             reason=model.reason,
-            status=model.status
+            status=model.status,
+            symptom=model.symptom,
         )
 
     @staticmethod
@@ -23,7 +24,8 @@ class AppointmentMapper:
             time_slot_id=entity.time_slot_id,
             doctor_specialty_id=entity.doctor_specialty_id,
             status=entity.status,
-            reason=entity.reason
+            reason=entity.reason,
+            symptom=entity.symptom
         )
 
     @staticmethod
@@ -45,6 +47,8 @@ class AppointmentMapper:
             "date": slot.date if slot else None,
             "start_time": slot.start_time if slot else None,
             "end_time": slot.end_time if slot else None,
+
+            # "has_reviewed": model.review is not None,
 
             "doctor": {
                 "id": doctor.id if doctor else None,
@@ -78,4 +82,46 @@ class AppointmentMapper:
                 "gender": patient.gender if patient else None,
                 "dob": patient.date_of_birth.strftime("%Y-%m-%d") if patient and patient.date_of_birth else None
             } if patient else None,
+        }
+
+    @staticmethod
+    def model_to_history(model):
+        doctor = model.doctor
+        doctor_user = doctor.user if doctor else None
+        clinic = doctor.clinic if doctor else None
+
+        specialty_rel = model.doctor_specialty
+        specialty = specialty_rel.specialty if specialty_rel else None
+
+        slot = model.time_slot
+
+        return {
+            "id": model.id,
+            "status": model.status,
+            "reason": model.reason,
+            "symptom": model.symptom,
+
+            "has_reviewed": model.review is not None,
+
+            "doctor": {
+                "id": doctor.id if doctor else None,
+                "full_name": doctor_user.full_name if doctor_user else None,
+            },
+
+            "specialty": {
+                "id": specialty.id if specialty else None,
+                "name": specialty.name if specialty else None,
+            },
+
+            "clinic": {
+                "id": clinic.id if clinic else None,
+                "name": clinic.name if clinic else None,
+                "address": clinic.address if clinic else None,
+            },
+
+            "schedule": {
+                "date": slot.date.strftime("%Y-%m-%d") if slot and slot.date else None,
+                "start_time": str(slot.start_time) if slot else None,
+                "end_time": str(slot.end_time) if slot else None,
+            }
         }

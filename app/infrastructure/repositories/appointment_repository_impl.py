@@ -12,19 +12,49 @@ from app.shared.utils.appointment_enum import AppointmentStatus
 
 class AppointmentRepositoryImpl(AppointmentRepository):
     @override
+    # def get_history_by_patient(self, user_id):
+    #     patient = PatientModel.query.filter_by(user_id=user_id).first()
+    #     models = (
+    #         AppointmentModel.query
+    #         .filter(
+    #             AppointmentModel.patient_id == patient.id,
+    #             # AppointmentModel.status.in_(["CONFIRMED", "COMPLETED"])
+    #         )
+    #         .join(DoctorModel, DoctorModel.id == AppointmentModel.doctor_id)
+    #         .order_by(AppointmentModel.created_at.desc())
+    #         .all()
+    #     )
+    #
+    #     return [AppointmentMapper.model_to_entity(m) for m in models]
+
     def get_history_by_patient(self, user_id):
+
         patient = PatientModel.query.filter_by(user_id=user_id).first()
+
         models = (
             AppointmentModel.query
+            .options(
+                joinedload(AppointmentModel.review),
+                joinedload(AppointmentModel.doctor)
+                .joinedload(DoctorModel.user),
+
+                joinedload(AppointmentModel.doctor)
+                .joinedload(DoctorModel.clinic),
+
+                joinedload(AppointmentModel.time_slot),
+
+                joinedload(AppointmentModel.doctor_specialty)
+                .joinedload(DoctorSpecialtyModel.specialty),
+
+            )
             .filter(
-                AppointmentModel.patient_id == patient.id,
-                # AppointmentModel.status.in_(["CONFIRMED", "COMPLETED"])
+                AppointmentModel.patient_id == patient.id
             )
             .order_by(AppointmentModel.created_at.desc())
             .all()
         )
 
-        return [AppointmentMapper.model_to_entity(m) for m in models]
+        return [AppointmentMapper.model_to_history(m) for m in models]
 
     @override
     def create(self, user_id ,appointment):

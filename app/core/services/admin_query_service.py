@@ -110,7 +110,15 @@ class AdminQueryService:
                 "weekend_shift": []
             }
 
-            for ds in doctor.doctor_specialties:
+            doctor_specialties = doctor.doctor_specialties
+
+            if filters.get("specialty_id"):
+                doctor_specialties = [
+                    ds for ds in doctor_specialties
+                    if ds.specialty_id == filters["specialty_id"]
+                ]
+
+            for ds in doctor_specialties:
                 if ds.specialty:
                     item["specialties"].append({
                         "id": ds.specialty.id,
@@ -131,18 +139,21 @@ class AdminQueryService:
                         "reason": s.reason
                     }
 
-                    if s.type == ScheduleType.REGULAR.name:
+                    if (
+                            s.type == ScheduleType.REGULAR.name
+                            and s.status != ScheduleStatus.LEAVE_APPROVED.name
+                    ):
                         item["regular"].append(payload)
 
                     elif (
                             s.type == ScheduleType.EXTRA_SHIFT.name
-                            and s.status == ScheduleStatus.EXTRA_APPROVED.name
+                            and s.status != ScheduleStatus.EXTRA_REJECTED.name
                     ):
                         item["extra_shift"].append(payload)
 
                     elif (
                             s.type == ScheduleType.WEEKEND_SHIFT.name
-                            and s.status == ScheduleStatus.WEEKEND_APPROVED.name
+                            and s.status != ScheduleStatus.WEEKEND_REJECTED.name
                     ):
                         item["weekend_shift"].append(payload)
 
@@ -226,6 +237,15 @@ class AdminQueryService:
         requests = self.admin_repo.get_schedule_pending_requests()
 
         result = []
+        day_labels = [
+            "Thứ 2",
+            "Thứ 3",
+            "Thứ 4",
+            "Thứ 5",
+            "Thứ 6",
+            "Thứ 7",
+            "Chủ nhật"
+        ]
 
         for item in requests:
             doctor = item.doctor_specialty.doctor
@@ -237,6 +257,7 @@ class AdminQueryService:
                 "specialty": specialty.name,
                 "type": item.type,
                 "day_of_week": item.day_of_week,
+                "day_label": day_labels[item.day_of_week],
                 "start_time": str(item.start_time),
                 "end_time": str(item.end_time),
                 "reason": item.reason,

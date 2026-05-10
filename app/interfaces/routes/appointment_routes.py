@@ -15,7 +15,7 @@ controller = AppointmentController(
     appointment_query_service= get_appointment_query_service()
 )
 
-appointment_bp.route("/", methods=["POST"])(controller.create)
+appointment_bp.route("", methods=["POST"])(controller.create)
 appointment_bp.route("/history", methods=["GET"])(controller.get_history)
 appointment_bp.route("/<appointment_id>", methods=["GET"])(controller.get_detail)
 appointment_bp.route("/<appointment_id>/complete", methods=["PATCH"])(controller.update_complete)

@@ -62,5 +62,6 @@ STATUS_MAP = {
 
     MessageCode.INVALID_SIGNATURE: 400,
     MessageCode.SCHEDULE_ALREADY_EXISTS : 409,
-    MessageCode.CREATED: 201
+    MessageCode.CREATED: 201,
+    MessageCode.REGISTER_USER_SUCCESS:201
 }
