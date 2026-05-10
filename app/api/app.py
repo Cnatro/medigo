@@ -70,8 +70,8 @@ def create_app():
     app.register_blueprint(admin_bp, url_prefix="/api/admin")
     app.logger.info("App initialized")
 
-    #cron_job_schedule = get_cronjob_schedule()
-    #cron_job_schedule.start_scheduler()
+    cron_job_schedule = get_cronjob_schedule()
+    cron_job_schedule.start_scheduler()
 
 
     return app
