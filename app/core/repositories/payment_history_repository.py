@@ -19,3 +19,6 @@ class PaymentHistoryRepository:
 
     @abstractmethod
     def find_refund_by_parent(self, parent_transaction_id): pass
+
+    @abstractmethod
+    def find_by_appointment_id(self, appointment_id): pass
