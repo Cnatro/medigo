@@ -46,3 +46,9 @@ class AdminRepository(ABC):
     @abstractmethod
     def get_doctor_detail_to_gen_calender(self, doctor_id):
         pass
+
+    @abstractmethod
+    def get_revenue_chart(self): pass
+
+    @abstractmethod
+    def get_appointment_status_summary(self): pass
