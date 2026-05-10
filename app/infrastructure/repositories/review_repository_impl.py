@@ -19,6 +19,7 @@ class ReviewRepositoryImpl(ReviewRepository):
             id=review.appointment_id,
             patient_id=patient.id
         ).first()
+
         if not appointment:
             return None
 
@@ -27,8 +28,26 @@ class ReviewRepositoryImpl(ReviewRepository):
 
         try:
             db.session.add(model)
+            db.session.flush()
+
+            # Tính lại rating
+            avg, total = db.session.query(
+                func.avg(ReviewModel.rating),
+                func.count(ReviewModel.id)
+            ).filter(
+                ReviewModel.doctor_id == review.doctor_id
+            ).first()
+
+            doctor = DoctorModel.query.get(review.doctor_id)
+
+            if doctor:
+                doctor.rating_avg = round(float(avg), 1) if avg else 0
+                doctor.total_reviews = total
+
             db.session.commit()
+
             return ReviewMapper.model_to_entity(model)
+
         except IntegrityError:
             db.session.rollback()
             return None
