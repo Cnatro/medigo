@@ -92,8 +92,8 @@ class TimeSlotMapper:
                 status = "completed"
             elif appointment.status in [AppointmentStatus.PENDING.name, AppointmentStatus.CONFIRMED.name]:
                 status = "booked"
-            else:
-                status = "booked"
+            elif appointment.status == AppointmentStatus.CANCELLED.name and not slot.is_available:
+                status = "completed"
         elif not slot.is_available:
             status = "closed"
 

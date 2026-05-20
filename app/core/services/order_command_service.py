@@ -3,6 +3,7 @@ from app.core.services.payment.momo_service import MomoService
 from app.infrastructure.repositories.appointment_repository_impl import AppointmentRepositoryImpl
 from app.infrastructure.repositories.order_repository_impl import OrderRepositoryImpl
 from app.infrastructure.repositories.payment_history_repository_impl import PaymentHistoryRepositoryImpl
+from app.infrastructure.repositories.time_slot_repository_impl import TimeSlotRepositoryImpl
 from app.shared.utils.appointment_enum import AppointmentStatus
 from app.shared.utils.message_code import MessageCode
 from app.shared.utils.payment_enum import PaymentType
@@ -11,11 +12,12 @@ from app.shared.utils.payment_enum import PaymentType
 class OrderCommandService:
 
     def __init__(self, order_repo: OrderRepositoryImpl, appointment_repo: AppointmentRepositoryImpl,
-                 momo_service: MomoService, payment_repo: PaymentHistoryRepositoryImpl):
+                 momo_service: MomoService, payment_repo: PaymentHistoryRepositoryImpl, time_slot_repo: TimeSlotRepositoryImpl):
         self.order_repo = order_repo
         self.momo_service = momo_service
         self.appointment_repo = appointment_repo
         self.payment_repo = payment_repo
+        self.time_slot_repo = time_slot_repo
 
     def create_order(self, order: Order, data):
         order = self.order_repo.save(order)
@@ -43,8 +45,10 @@ class OrderCommandService:
 
     def refund_money_order(self, data):
         # cancel appointment
-        self.appointment_repo.update_status(appointment_id=data["appointment_id"], status=AppointmentStatus.CANCELLED.name,
+        appointment = self.appointment_repo.update_status(appointment_id=data["appointment_id"], status=AppointmentStatus.CANCELLED.name,
                                             symptom='')
+
+        self.time_slot_repo.mark_available(appointment['time_slot_id'])
         payment_history = self.payment_repo.find_by_appointment_id(appointment_id=data["appointment_id"])
 
         if not payment_history:

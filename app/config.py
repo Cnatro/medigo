@@ -1,5 +1,6 @@
 import os
 from datetime import timedelta
+from urllib.parse import quote_plus
 
 
 class Config:
@@ -25,11 +26,14 @@ class Config:
     MOMO_RETURN_URL = os.getenv("MOMO_RETURN_URL")
     MOMO_NOTIFY_URL = os.getenv("MOMO_NOTIFY_URL")
 
+    password = quote_plus(DB_PASSWORD)
     SQLALCHEMY_DATABASE_URI = (
-        f"postgresql://{DB_USER}:{DB_PASSWORD}"
+        f"postgresql://{DB_USER}:{password}"
         f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
         f"?sslmode={DB_SSLMODE}"
     )
+
+    DIRECT_URL = os.getenv("DIRECT_URL")
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
