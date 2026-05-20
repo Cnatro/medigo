@@ -18,6 +18,8 @@ class OrderStatus(Enum):
     PAID = "PAID"
     CANCELLED = "CANCELLED"
     REFUND_SUCCESS = "REFUND_SUCCESS"
+    FAILED = "FAILED"
+    REFUND_FAILED = "REFUND_FAILED"
 
 class PaymentProvider(Enum):
     MOMO = "MOMO"

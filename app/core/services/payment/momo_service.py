@@ -102,7 +102,7 @@ class MomoService:
         self.append_log(transaction, "PENDING", "Init payment", payload)
 
         self.payment_repo.save(transaction)
-        self.time_slot_repo.mark_unavailable(data["time_slot_id"])
+        # self.time_slot_repo.mark_unavailable(data["time_slot_id"])
 
         res = requests.post(Config.MOMO_ENDPOINT, json=payload)
 
@@ -184,7 +184,7 @@ class MomoService:
             )
 
             self.payment_repo.update(transaction)
-            # self.time_slot_repo.mark_unavailable(extra_data.get("time_slot_id"))
+            self.time_slot_repo.mark_unavailable(extra_data.get("time_slot_id"))
             self.appointment_repo.update_status(appointment_id=order.appointment_id,symptom='', status=AppointmentStatus.CONFIRMED.name)
 
             return order, MessageCode.PAYMENT_SUCCESS
@@ -194,12 +194,25 @@ class MomoService:
             transaction.paid_at = None
 
             self.payment_repo.update(transaction)
+            order = order_repo.update_order_status(
+                order_id=extra_data.get("order_id"),
+                status=OrderStatus.PENDING
+            )
+            self.appointment_repo.update_status(appointment_id=order.appointment_id, symptom='',
+                                                status=AppointmentStatus.CANCELLED.name)
             return None, MessageCode.PAYMENT_PENDING
 
         else:
             transaction.status = PaymentStatus.FAILED.name
             transaction.paid_at = None
 
+            order = order_repo.update_order_status(
+                order_id=extra_data.get("order_id"),
+                status=OrderStatus.FAILED
+            )
+
+            self.appointment_repo.update_status(appointment_id=order.appointment_id, symptom='',
+                                                status=AppointmentStatus.CANCELLED.name)
             self.payment_repo.update(transaction)
             return None, MessageCode.PAYMENT_FAILED
 
@@ -285,10 +298,19 @@ class MomoService:
             return order, MessageCode.PAYMENT_SUCCESS
 
         elif meta["type"] == "PENDING":
+            order = order_repo.update_order_status(
+                order_id=payment_history.order_id,
+                status=OrderStatus.PENDING
+            )
+
             self.payment_repo.update(transaction_saved)
             return None, MessageCode.REFUND_PENDING
 
         else:
+            order = order_repo.update_order_status(
+                order_id=payment_history.order_id,
+                status=OrderStatus.REFUND_FAILED
+            )
             transaction_saved.status = PaymentStatus.REFUND_FAILED.name
             self.payment_repo.update(transaction_saved)
             return None, MessageCode.REFUND_FAILED

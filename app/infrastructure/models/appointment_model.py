@@ -9,7 +9,7 @@ class AppointmentModel(db.Model):
     id = db.Column(db.String, primary_key=True, default=lambda: str(uuid.uuid4()))
     patient_id = db.Column(db.String, db.ForeignKey("patients.id"))
     doctor_id = db.Column(db.String, db.ForeignKey("doctors.id"))
-    time_slot_id = db.Column(db.String, db.ForeignKey("time_slots.id"), unique=True)
+    time_slot_id = db.Column(db.String, db.ForeignKey("time_slots.id"), unique=False)
     doctor_specialty_id = db.Column( db.String, db.ForeignKey("doctor_specialties.id"),nullable=False)
     status = db.Column(db.String)
     reason = db.Column(db.Text)
