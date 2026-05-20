@@ -47,6 +47,7 @@ class AppointmentMapper:
             "date": slot.date if slot else None,
             "start_time": slot.start_time if slot else None,
             "end_time": slot.end_time if slot else None,
+            "time_slot_id":slot.id if slot else None,
 
             # "has_reviewed": model.review is not None,
 
