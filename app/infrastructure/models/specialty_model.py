@@ -10,7 +10,7 @@ class SpecialtyModel(db.Model):
     id = db.Column(db.String, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = db.Column(db.String)
     description = db.Column(db.Text)
-    embedding = db.Column(Vector(3072), nullable=True)
+    embedding = db.Column(Vector(768), nullable=True)
 
     doctor_specialties = db.relationship(
         "DoctorSpecialtyModel",

@@ -71,7 +71,7 @@ def create_app():
     app.logger.info("App initialized")
 
     cron_job_schedule = get_cronjob_schedule()
-    cron_job_schedule.start_scheduler()
+    cron_job_schedule.start_scheduler(app=app)
 
 
     return app

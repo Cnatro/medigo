@@ -15,7 +15,7 @@ class DoctorModel(db.Model):
     clinic_id = db.Column(db.String, db.ForeignKey("clinics.id"))
     rating_avg = db.Column(db.Float, default=0)
     total_reviews = db.Column(db.Integer, default=0)
-    embedding = db.Column(Vector(3072), nullable=True)
+    embedding = db.Column(Vector(768), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     user = db.relationship("UserModel", back_populates="doctor")
