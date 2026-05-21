@@ -8,7 +8,7 @@ from app.interfaces.mappers.specialty_mapper import SpecialtyMapper
 
 class SpecialtyRepositoryImpl(SpecialtyRepository):
     @override
-    def get_specialties(self):
+    def get_specialties_with_doctor(self):
         subquery = db.session.query(DoctorSpecialtyModel.specialty_id).distinct()
 
         models = SpecialtyModel.query.filter(
@@ -38,3 +38,12 @@ class SpecialtyRepositoryImpl(SpecialtyRepository):
             .filter(DoctorModel.user_id == user_id).distinct().all()
 
         return [SpecialtyMapper.model_to_entity(m) for m in models]
+
+    @override
+    def get_specialties_all(self):
+        models = SpecialtyModel.query.all()
+
+        return [
+            SpecialtyMapper.model_to_entity(m)
+            for m in models
+        ]

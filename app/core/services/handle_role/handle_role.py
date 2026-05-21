@@ -4,6 +4,7 @@ from typing import override
 from app.core.entities.doctor import Doctor
 from app.core.entities.patient import Patient
 from app.core.services.handle_role.registry import register_role
+from app.core.services.mail.mail_service import MailService
 from app.infrastructure.repositories.doctor_repository_impl import DoctorRepositoryImpl
 from app.shared.utils.role import Role
 
@@ -38,6 +39,9 @@ class DoctorRoleHandler(BaseHandle):
         specialty_ids = profile.get("specialty_ids")
         if specialty_ids and saved:
             self.doctor_repo.create_doctor_specialties(doctor=saved, specialties_ids=specialty_ids)
+
+        #send-mail
+        MailService.send_doctor_account_email(doctor_email=user.email, doctor_name=user.full_name)
 
         return saved
 

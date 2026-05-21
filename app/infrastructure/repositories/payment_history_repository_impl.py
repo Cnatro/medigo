@@ -2,11 +2,12 @@ from abc import abstractmethod
 from typing import override
 
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import joinedload
 
 from app.core.entities.payment_transaction import PaymentTransaction
 from app.core.repositories.payment_history_repository import PaymentHistoryRepository
 from app.infrastructure.db import db
-from app.infrastructure.models import PaymentTransactionModel, OrderModel
+from app.infrastructure.models import PaymentTransactionModel, OrderModel, AppointmentModel, PatientModel, DoctorModel
 from app.interfaces.mappers.payment_transaction_mapper import PaymentTransactionMapper
 from app.shared.utils.payment_enum import PaymentStatus, PaymentType
 
@@ -115,3 +116,52 @@ class PaymentHistoryRepositoryImpl(PaymentHistoryRepository):
         )
 
         return PaymentTransactionMapper.model_to_entity(model)
+
+    @override
+    def info_refund_mail(self, order_id):
+        transaction = (
+            PaymentTransactionModel.query
+            .options(
+                joinedload(PaymentTransactionModel.order)
+                .joinedload(OrderModel.appointment)
+                .joinedload(AppointmentModel.patient)
+                .joinedload(PatientModel.user),
+
+                joinedload(PaymentTransactionModel.order)
+                .joinedload(OrderModel.appointment)
+                .joinedload(AppointmentModel.doctor)
+                .joinedload(DoctorModel.user),
+
+                joinedload(PaymentTransactionModel.order)
+                .joinedload(OrderModel.appointment)
+                .joinedload(AppointmentModel.time_slot),
+            )
+            .filter(
+                PaymentTransactionModel.order_id == order_id,
+                PaymentTransactionModel.type == PaymentType.PAYMENT.name
+            )
+            .first()
+        )
+
+        if not transaction:
+            return None
+
+        appointment = transaction.order.appointment
+
+        patient_user = appointment.patient.user
+        doctor_user = appointment.doctor.user
+        time_slot = appointment.time_slot
+
+        return {
+            "patient_email": patient_user.email,
+            "patient_name": patient_user.full_name,
+
+            "doctor_name": doctor_user.full_name,
+
+            "appointment_date": str(time_slot.date),
+
+            "appointment_time":
+                f"{time_slot.start_time} - {time_slot.end_time}",
+
+            "amount": transaction.amount
+        }

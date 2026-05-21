@@ -16,6 +16,7 @@ from app.core.services.clinic_query_service import ClinicQueryService
 from app.core.services.cron_job.gen_scheduler import CronJobSchedule
 from app.core.services.doctor_command_service import DoctorCommandService
 from app.core.services.doctor_query_service import DoctorQueryService
+from app.core.services.firebase.firebase_service import FirebaseService
 from app.core.services.handle_role.query_registry import ROLE_QUERY_HANDLERS
 from app.core.services.handle_role.registry import ROLE_HANDLES
 from app.core.services.handle_role.update_registry import ROLE_UPDATE_HANDLERS
@@ -92,7 +93,8 @@ def get_user_query_service():
     role_query_handlers = get_role_query_handlers()
     return UserQueryService(
         repo=repo,
-        role_query_handlers=role_query_handlers
+        role_query_handlers=role_query_handlers,
+        firebase_service=FirebaseService()
     )
 
 

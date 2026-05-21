@@ -10,7 +10,7 @@ class SpecialtyQueryService:
         self.specialty_repo = specialty_repo
 
     def get_specialties(self):
-        results = self.specialty_repo.get_specialties()
+        results = self.specialty_repo.get_specialties_with_doctor()
 
         if not results:
             return None, MessageCode.FAIL
@@ -26,3 +26,15 @@ class SpecialtyQueryService:
         results = self.specialty_repo.get_get_specialties_by_doctor(user_id=user_id)
 
         return [SpecialtyMapper.entity_to_dict(e) for e in results], MessageCode.SUCCESS
+
+
+    def get_specialties_all(self):
+        results = self.specialty_repo.get_specialties_all()
+
+        if not results:
+            return None, MessageCode.FAIL
+
+        return [
+            SpecialtyMapper.entity_to_dict(r)
+            for r in results
+        ], MessageCode.SUCCESS

@@ -4,6 +4,8 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 
+from app.core.services.firebase.firebase_config import FirebaseAdmin
+from app.core.services.mail.mail_config import MailConfig
 from app.dependencies import get_cronjob_schedule
 from app.interfaces.routes.admin_routes import admin_bp
 from app.interfaces.routes.appointment_routes import appointment_bp
@@ -27,11 +29,11 @@ from app.infrastructure.db import db
 
 migrate = Migrate()
 
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
 )
+
 
 def create_app():
     app = Flask(__name__)
@@ -55,6 +57,8 @@ def create_app():
 
     db.init_app(app)
     JWTManager(app)
+    FirebaseAdmin.initialize()
+    MailConfig.initialize(app=app)
 
     migrate.init_app(app, db)
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
@@ -74,6 +78,5 @@ def create_app():
 
     cron_job_schedule = get_cronjob_schedule()
     cron_job_schedule.start_scheduler(app=app)
-
 
     return app
