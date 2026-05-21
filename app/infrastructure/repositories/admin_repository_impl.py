@@ -171,7 +171,6 @@ class AdminRepositoryImpl(AdminRepository):
             )
 
             .order_by(desc(AppointmentModel.created_at))
-            .limit(10)
             .all()
         )
 
