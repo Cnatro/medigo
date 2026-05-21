@@ -171,8 +171,8 @@ class AdminQueryService:
             }
         }, MessageCode.SUCCESS
 
-    def get_payments(self):
-        payments = self.admin_repo.get_all_payment_transactions()
+    def get_payments(self, page, limit):
+        payments = self.admin_repo.get_all_payment_transactions(page=page, limit=limit)
 
         result = [
             {
@@ -184,6 +184,7 @@ class AdminQueryService:
                 "amount": float(payment.amount),
                 "status": payment.status,
                 "type": payment.type,
+                "logs": payment.logs,
                 "created_at": payment.created_at.isoformat()
                 if payment.created_at else None
             }

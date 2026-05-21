@@ -260,8 +260,8 @@ class AdminRepositoryImpl(AdminRepository):
         return OrderModel.query.all()
 
     @override
-    def get_all_payment_transactions(self):
-        return (
+    def get_all_payment_transactions(self, page=None, limit=None):
+        query = (
             db.session.query(
                 PaymentTransactionModel.id,
                 PaymentTransactionModel.order_id,
@@ -271,6 +271,7 @@ class AdminRepositoryImpl(AdminRepository):
                 PaymentTransactionModel.status,
                 PaymentTransactionModel.type,
                 PaymentTransactionModel.created_at,
+                PaymentTransactionModel.logs,
 
                 UserModel.full_name.label("patient_name")
             )
@@ -287,8 +288,12 @@ class AdminRepositoryImpl(AdminRepository):
                 UserModel.id == PatientModel.user_id
             )
             .order_by(desc(PaymentTransactionModel.created_at))
-            .all()
         )
+
+        if page is not None and limit is not None:
+            query = query.limit(limit).offset((page - 1) * limit)
+
+        return query.all()
 
     @override
     def get_schedule_pending_requests(self):

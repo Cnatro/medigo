@@ -36,7 +36,7 @@ class AdminRepository(ABC):
         pass
 
     @abstractmethod
-    def get_all_payment_transactions(self):
+    def get_all_payment_transactions(self,page, limit):
         pass
 
     @abstractmethod
