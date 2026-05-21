@@ -1,5 +1,7 @@
 # MediGo - Flask Clean Architecture + CQRS
 
+Live Demo / Deployment: https://medigo-bcq1.onrender.com
+
 Đặt lịch khám, khám bệnh
 
 # Cấu trúc dự án
