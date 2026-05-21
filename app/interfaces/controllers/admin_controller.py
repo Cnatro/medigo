@@ -66,7 +66,10 @@ class AdminController:
         return ApiResponse.success(code, result)
 
     def get_payments(self):
-        result, code = self.admin_query_service.get_payments()
+        page = request.args.get("page", 1, type=int)
+        limit = request.args.get("limit", 10, type=int)
+
+        result, code = self.admin_query_service.get_payments(page=page, limit=limit)
         return ApiResponse.success(code, result)
 
     def get_payment_stats(self):
