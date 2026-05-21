@@ -22,3 +22,6 @@ class PaymentHistoryRepository:
 
     @abstractmethod
     def find_by_appointment_id(self, appointment_id): pass
+
+    @abstractmethod
+    def info_refund_mail(self, order_id): pass

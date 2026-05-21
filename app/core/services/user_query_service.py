@@ -1,15 +1,17 @@
 from flask_jwt_extended import create_access_token, get_jwt_identity
 from passlib.handlers.argon2 import argon2
 
+from app.core.services.firebase.firebase_service import FirebaseService
 from app.shared.utils.message_code import MessageCode
 from app.shared.utils.role import Role
 
 
 class UserQueryService:
 
-    def __init__(self, repo, role_query_handlers):
+    def __init__(self, repo, role_query_handlers, firebase_service: FirebaseService):
         self.repo = repo
         self.role_query_handlers = role_query_handlers
+        self.firebase_service = firebase_service
 
     def get_by_email(self, email):
         user = self.repo.find_by_email(email=email)
@@ -51,7 +53,6 @@ class UserQueryService:
                 "phone": user.phone,
             }, MessageCode.SUCCESS
 
-
         handler = self.role_query_handlers.get(user.role)
 
         if not handler:
@@ -64,7 +65,23 @@ class UserQueryService:
             "email": user.email,
             "full_name": user.full_name,
             "role": user.role,
-            "avatar_url":user.avatar_url ,
-            "phone":user.phone,
+            "avatar_url": user.avatar_url,
+            "phone": user.phone,
             "profile": profile.__dict__ if profile else None
+        }, MessageCode.SUCCESS
+
+    def google_login(self, id_token):
+        firebase_user = self.firebase_service.verify_token(id_token)
+
+        user = self.repo.find_by_email(email=firebase_user['email'])
+
+        if user is None:
+            return None, MessageCode.INVALID_CREDENTIALS
+
+        access_token = create_access_token(identity=user.id)
+
+        return {
+            "access_token": access_token,
+            "user_id": user.id,
+            "email": user.email
         }, MessageCode.SUCCESS

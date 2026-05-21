@@ -13,3 +13,4 @@ controller = AuthController(
 
 auth_bp.route("/register", methods=["POST"])(controller.register)
 auth_bp.route("/login", methods=["POST"])(controller.login)
+auth_bp.route( "/google-login", methods=["POST"])(controller.google_login)

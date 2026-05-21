@@ -57,7 +57,7 @@ class AppointmentRepositoryImpl(AppointmentRepository):
         return [AppointmentMapper.model_to_history(m) for m in models]
 
     @override
-    def create(self, user_id ,appointment):
+    def create(self, user_id, appointment):
         patient = PatientModel.query.filter_by(user_id=user_id).first()
         appointment.patient_id = patient.id
         model = AppointmentMapper.entity_to_model(appointment)
@@ -102,3 +102,41 @@ class AppointmentRepositoryImpl(AppointmentRepository):
         db.session.commit()
 
         return AppointmentMapper.model_to_detail(model)
+
+    @override
+    def info_send_mail(self, appointment_id):
+
+        model = (
+            AppointmentModel.query
+            .options(
+                joinedload(AppointmentModel.patient)
+                .joinedload(PatientModel.user),
+
+                joinedload(AppointmentModel.doctor)
+                .joinedload(DoctorModel.user),
+
+                joinedload(AppointmentModel.time_slot),
+            )
+            .filter(AppointmentModel.id == appointment_id)
+            .first()
+        )
+
+        if not model:
+            return None
+
+        patient_user = model.patient.user
+        doctor_user = model.doctor.user
+        time_slot = model.time_slot
+
+        return {
+            'patient_email': patient_user.email,
+
+            'patient_name': patient_user.full_name,
+
+            'doctor_name': doctor_user.full_name,
+
+            'appointment_date': str(time_slot.date),
+
+            'appointment_time':
+                f'{time_slot.start_time} - {time_slot.end_time}',
+        }

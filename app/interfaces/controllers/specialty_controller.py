@@ -22,3 +22,11 @@ class SpecialtyController:
         results, code = self.specialty_query_service.get_specialties_by_doctor()
 
         return ApiResponse.success(messageCode=code, data=results)
+
+    def get_specialties_all(self):
+        result, code = self.specialty_query_service.get_specialties_all()
+
+        if not result:
+            return ApiResponse.not_found(code, result)
+
+        return ApiResponse.success(code, result)

@@ -1,13 +1,17 @@
 from flask import request
 
 from app.core.entities.user import User
+from app.core.services.firebase.firebase_service import FirebaseService
+from app.core.services.user_command_service import UserCommandService
+from app.core.services.user_query_service import UserQueryService
 from app.shared.utils.api_response import ApiResponse
+from app.shared.utils.message_code import MessageCode
 from app.shared.utils.role import Role
 
 
 class AuthController:
 
-    def __init__(self, user_command_service, user_query_service):
+    def __init__(self, user_command_service: UserCommandService, user_query_service: UserQueryService):
         self.user_command_service = user_command_service
         self.user_query_service = user_query_service
 
@@ -45,3 +49,20 @@ class AuthController:
             return ApiResponse.error(code)
 
         return ApiResponse.success(code, data=data)
+
+    def google_login(self):
+        try:
+            data = request.get_json()
+
+            id_token = data.get("idToken")
+
+            if not id_token:
+                return ApiResponse.not_found(MessageCode.INVALID_CREDENTIALS)
+
+            data, code = self.user_query_service.google_login(id_token)
+
+            return ApiResponse.success(code, data=data)
+
+        except Exception as e:
+
+            return ApiResponse.error(MessageCode.INVALID_CREDENTIALS)

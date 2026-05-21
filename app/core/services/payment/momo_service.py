@@ -10,6 +10,7 @@ import logging
 from app.config import Config
 from app.core.entities.order import Order
 from app.core.entities.payment_transaction import PaymentTransaction
+from app.core.services.mail.mail_service import MailService
 from app.infrastructure.repositories.appointment_repository_impl import AppointmentRepositoryImpl
 from app.infrastructure.repositories.order_repository_impl import OrderRepositoryImpl
 from app.infrastructure.repositories.payment_history_repository_impl import PaymentHistoryRepositoryImpl
@@ -25,7 +26,8 @@ log = logging.getLogger(__name__)
 
 class MomoService:
 
-    def __init__(self, payment_repo: PaymentHistoryRepositoryImpl, time_slot_repo: TimeSlotRepositoryImpl, appointment_repo: AppointmentRepositoryImpl):
+    def __init__(self, payment_repo: PaymentHistoryRepositoryImpl, time_slot_repo: TimeSlotRepositoryImpl,
+                 appointment_repo: AppointmentRepositoryImpl):
         self.payment_repo = payment_repo
         self.time_slot_repo = time_slot_repo
         self.appointment_repo = appointment_repo
@@ -185,7 +187,19 @@ class MomoService:
 
             self.payment_repo.update(transaction)
             self.time_slot_repo.mark_unavailable(extra_data.get("time_slot_id"))
-            self.appointment_repo.update_status(appointment_id=order.appointment_id,symptom='', status=AppointmentStatus.CONFIRMED.name)
+            self.appointment_repo.update_status(appointment_id=order.appointment_id, symptom='',
+                                                status=AppointmentStatus.CONFIRMED.name)
+
+            # send-mail
+            mail_info = self.appointment_repo.info_send_mail(appointment_id=order.appointment_id)
+
+            MailService.send_appointment_success_email(
+                patient_email=mail_info['patient_email'],
+                patient_name=mail_info['patient_name'],
+                doctor_name=mail_info['doctor_name'],
+                appointment_date=mail_info['appointment_date'],
+                appointment_time=mail_info['appointment_time'],
+            )
 
             return order, MessageCode.PAYMENT_SUCCESS
 
@@ -295,6 +309,21 @@ class MomoService:
             )
 
             self.payment_repo.update(transaction_saved)
+
+            # send-mail
+            mail_info = self.payment_repo.info_refund_mail(
+                order_id=payment_history.order_id
+            )
+
+            MailService.send_refund_success_email(
+                patient_email=mail_info["patient_email"],
+                patient_name=mail_info["patient_name"],
+                doctor_name=mail_info["doctor_name"],
+                appointment_time=mail_info["appointment_time"],
+                appointment_date=mail_info["appointment_date"],
+                amount=mail_info["amount"],
+            )
+
             return order, MessageCode.PAYMENT_SUCCESS
 
         elif meta["type"] == "PENDING":

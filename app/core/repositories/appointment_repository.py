@@ -13,3 +13,6 @@ class AppointmentRepository(ABC):
 
     @abstractmethod
     def update_status(self, appointment_id, symptom: str, status): pass
+
+    @abstractmethod
+    def info_send_mail(self, appointment_id): pass

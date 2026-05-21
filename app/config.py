@@ -21,7 +21,7 @@ class Config:
 
     MOMO_ENDPOINT = os.getenv("MOMO_ENDPOINT")
     MOMO_REFUND_ENDPOINT = os.getenv("MOMO_REFUND_ENDPOINT")
-    MOMO_QUERY_ENDPOINT=os.getenv("MOMO_QUERY_ENDPOINT")
+    MOMO_QUERY_ENDPOINT = os.getenv("MOMO_QUERY_ENDPOINT")
 
     MOMO_RETURN_URL = os.getenv("MOMO_RETURN_URL")
     MOMO_NOTIFY_URL = os.getenv("MOMO_NOTIFY_URL")
@@ -41,6 +41,15 @@ class Config:
     CLOUDINARY_API_KEY = os.getenv("CLOUDINARY_API_KEY")
     CLOUDINARY_API_SECRET = os.getenv("CLOUDINARY_API_SECRET")
 
-    GEMINI_API_KEY=os.getenv("GEMINI_API_KEY")
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-    HUGGING_FACE_API_KEY=os.getenv("HUGGING_FACE_API_KEY")
+    HUGGING_FACE_API_KEY = os.getenv("HUGGING_FACE_API_KEY")
+
+    FIRE_BASE_SDK = os.getenv("FIRE_BASE_SDK")
+
+    MAIL_SERVER = os.getenv("MAIL_SERVER")
+    MAIL_PORT = os.getenv("MAIL_PORT")
+    MAIL_USE_TLS = os.getenv("MAIL_USE_TLS")
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
+    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER")
