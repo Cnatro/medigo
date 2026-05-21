@@ -40,6 +40,8 @@ class RankingService:
                 "rating_avg": d.rating_avg,
                 "experience_years": d.experience_years,
                 "score": score,
+                "amount": float(d.amount) if d.amount is not None else 0,
+                "doctor_specialty_id": d.doctor_specialty_id
             })
 
         ranked_doctors.sort(

@@ -9,6 +9,8 @@ from app.core.services.ai.rag_service import RagService
 from app.core.services.ai.ranking_service import RankingService
 from app.core.services.appointment_command_service import AppointmentCommandService
 from app.core.services.appointment_query_service import AppointmentQueryService
+from app.core.services.chat_command_service import ChatCommandService
+from app.core.services.chat_query_service import ChatQueryService
 from app.core.services.clinic_command_service import ClinicCommandService
 from app.core.services.clinic_query_service import ClinicQueryService
 from app.core.services.cron_job.gen_scheduler import CronJobSchedule
@@ -31,6 +33,7 @@ from app.core.services.user_command_service import UserCommandService
 from app.core.services.user_query_service import UserQueryService
 from app.infrastructure.repositories.admin_repository_impl import AdminRepositoryImpl
 from app.infrastructure.repositories.appointment_repository_impl import AppointmentRepositoryImpl
+from app.infrastructure.repositories.chat_repository_impl import ChatRepositoryImpl
 from app.infrastructure.repositories.clinic_repository_impl import ClinicRepositoryImpl
 from app.infrastructure.repositories.doctor_repository_impl import DoctorRepositoryImpl
 from app.infrastructure.repositories.order_repository_impl import OrderRepositoryImpl
@@ -192,8 +195,9 @@ def get_appointment_command_service():
 
 def get_appointment_query_service():
     return AppointmentQueryService(
-        appointment_repo= AppointmentRepositoryImpl(),
+        appointment_repo=AppointmentRepositoryImpl(),
     )
+
 
 def get_time_slot_command_service():
     return TimeSlotCommandService(
@@ -219,13 +223,15 @@ def get_schedule_query_service():
 
 def get_review_command_service():
     return ReviewCommandService(
-        review_repo = ReviewRepositoryImpl(),
+        review_repo=ReviewRepositoryImpl(),
     )
+
 
 def get_review_query_service():
     return ReviewQueryService(
-        review_repo= ReviewRepositoryImpl()
+        review_repo=ReviewRepositoryImpl()
     )
+
 
 def get_admin_repo():
     return AdminRepositoryImpl()
@@ -239,11 +245,26 @@ def get_admin_query_service():
 
 def get_admin_command_service():
     return AdminCommandService(
-        schedule_repo= ScheduleRepositoryImpl(),
+        schedule_repo=ScheduleRepositoryImpl(),
         admin_repo=get_admin_repo()
     )
 
+
 def get_cronjob_schedule():
     return CronJobSchedule(
-        schedule_command_service= get_schedule_command_service()
+        schedule_command_service=get_schedule_command_service()
+    )
+
+
+def get_chat_command_service():
+    return ChatCommandService(
+        rag_service=get_rag_service(),
+        chat_repo=ChatRepositoryImpl(),
+
+    )
+
+
+def get_chat_query_service():
+    return ChatQueryService(
+        chat_repo=ChatRepositoryImpl()
     )

@@ -8,6 +8,7 @@ from app.dependencies import get_cronjob_schedule
 from app.interfaces.routes.admin_routes import admin_bp
 from app.interfaces.routes.appointment_routes import appointment_bp
 from app.interfaces.routes.auth_routes import auth_bp
+from app.interfaces.routes.chat_route import chat_bp
 from app.interfaces.routes.clinic_routes import clinic_bp
 from app.interfaces.routes.doctor_routes import doctor_bp
 from app.interfaces.routes.order_routes import order_bp
@@ -68,6 +69,7 @@ def create_app():
     app.register_blueprint(schedule_bp, url_prefix="/api/schedules")
     app.register_blueprint(review_bp, url_prefix="/api/reviews")
     app.register_blueprint(admin_bp, url_prefix="/api/admin")
+    app.register_blueprint(chat_bp, url_prefix="/api")
     app.logger.info("App initialized")
 
     cron_job_schedule = get_cronjob_schedule()

@@ -2,6 +2,7 @@ import uuid
 from datetime import datetime
 
 from app.infrastructure.db import db
+from sqlalchemy.dialects.postgresql import JSONB
 
 class ChatSessionModel(db.Model):
     __tablename__ = "chat_sessions"
@@ -16,8 +17,8 @@ class ChatSessionModel(db.Model):
 class ChatMessageModel(db.Model):
     __tablename__ = "chat_messages"
 
-    id = db.Column(db.String, primary_key=True)
+    id = db.Column(db.String, primary_key=True, default=lambda: str(uuid.uuid4()))
     session_id = db.Column(db.String, db.ForeignKey("chat_sessions.id"))
     sender = db.Column(db.String)
-    message = db.Column(db.Text)
+    message = db.Column(JSONB)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
