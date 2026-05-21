@@ -141,7 +141,9 @@ class DoctorRepositoryImpl(DoctorRepository):
                            u.full_name,
                            d.rating_avg,
                            d.experience_years,
-                           c.name AS clinic_name
+                           c.name AS clinic_name,
+                           ds.consultation_fee as amount,
+                           ds.id as doctor_specialty_id
                     FROM doctors d
                     JOIN users u ON u.id = d.user_id
                     JOIN clinics c ON c.id = d.clinic_id

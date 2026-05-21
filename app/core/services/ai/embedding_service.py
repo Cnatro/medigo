@@ -15,7 +15,11 @@ class EmbeddingService:
     def embed(self, text: str):
         res = client_gemini.models.embed_content(
             model="gemini-embedding-001",
-            contents=text
+            contents=text,
+            config={
+                "output_dimensionality": 768
+            }
+
         )
         return res.embeddings[0].values
 
